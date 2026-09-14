@@ -1,0 +1,1930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Ashwath Jain">
+    <meta name="description" content="Standalone PBR Normal and ORM Map Generator with live 3D preview, edge masking, and canvas editor. Created by Ashwath Jain.">
+    <title>PBR Texture Tool - Normal & ORM Generator</title>
+    <style>
+        :root {
+            --bg-primary: #12141a;
+            --bg-secondary: #1a1d26;
+            --bg-card: #222634;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --accent-glow: rgba(59, 130, 246, 0.4);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border: #2e3446;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --modal-bg: rgba(10, 12, 18, 0.94);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1280px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #60a5fa, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* Drop Zone */
+        .drop-zone {
+            background-color: var(--bg-secondary);
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 36px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: var(--accent);
+            background-color: rgba(59, 130, 246, 0.05);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .drop-zone input[type="file"] {
+            display: none;
+        }
+
+        .drop-icon {
+            width: 44px;
+            height: 44px;
+            margin: 0 auto 10px;
+            stroke: var(--accent);
+        }
+
+        .drop-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .drop-subtext {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Controls */
+        .controls-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px 24px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            align-items: center;
+        }
+
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .slider-val {
+            color: var(--accent);
+            font-family: monospace;
+            font-size: 13px;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: var(--bg-card);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--accent-glow);
+            transition: transform 0.1s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        .custom-select {
+            width: 100%;
+            background: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .custom-select:hover, .custom-select:focus {
+            border-color: var(--accent);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            grid-column: 1 / -1;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            background-color: var(--border);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-success { background-color: var(--success); }
+        .btn-success:hover { background-color: #059669; }
+        .btn-warning { background-color: var(--warning); color: #111827; }
+        .btn-warning:hover { background-color: #d97706; }
+        .btn-secondary { background-color: var(--bg-card); border: 1px solid var(--border); color: var(--text-main); }
+        .btn-secondary:hover { background-color: #2a3042; }
+        .btn-primary { background-color: var(--accent); }
+
+        /* Shape Toggle Switcher */
+        .shape-switcher {
+            display: flex;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            padding: 2px;
+            gap: 2px;
+            border: 1px solid var(--border);
+        }
+
+        .shape-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .shape-btn.active {
+            background: var(--accent);
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(59, 130, 246, 0.4);
+        }
+
+        .shape-btn:hover:not(.active) {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Grid */
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header {
+            padding: 14px 18px;
+            background-color: var(--bg-card);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-norm { background: #6366f1; color: #fff; }
+        .badge-orm { background: #10b981; color: #fff; }
+        .badge-orig { background: #6b7280; color: #fff; }
+        .badge-3d { background: #ec4899; color: #fff; }
+
+        .card-body {
+            position: relative;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0f1117;
+            min-height: 280px;
+            user-select: none;
+        }
+
+        .card-body canvas, .card-body img {
+            max-width: 100%;
+            max-height: 280px;
+            border-radius: 8px;
+            object-fit: contain;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .card-footer {
+            padding: 12px 16px;
+            background-color: var(--bg-card);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-text {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+
+        /* 3D Viewport */
+        #viewport-3d {
+            width: 100%;
+            height: 280px;
+            border-radius: 8px;
+        }
+
+        /* ------------------------------------------------------------- */
+        /* Fullscreen / Pop-up Normal Canvas Editor Modal               */
+        /* ------------------------------------------------------------- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: var(--modal-bg);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            padding: 16px 24px;
+            gap: 12px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-card);
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .modal-title-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .modal-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 14px;
+            background: var(--bg-secondary);
+            padding: 10px 18px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .tool-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tool-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .segmented-btn-group {
+            display: flex;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            padding: 3px;
+            gap: 3px;
+            border: 1px solid var(--border);
+        }
+
+        .seg-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .seg-btn.active {
+            background: var(--accent);
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(59, 130, 246, 0.4);
+        }
+
+        .seg-btn:hover:not(.active) {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .mini-slider {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 140px;
+        }
+
+        .mini-slider span {
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* Viewport for pan & zoom */
+        .editor-viewport {
+            flex: 1;
+            background: #090a0f;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: crosshair;
+        }
+
+        .editor-viewport.pan-mode {
+            cursor: grab;
+        }
+        .editor-viewport.pan-mode:active {
+            cursor: grabbing;
+        }
+
+        /* Canvas stage transform layer */
+        #editorStage {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        #editorCanvas {
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            image-rendering: auto;
+            border-radius: 4px;
+            background: #8080ff;
+        }
+
+        /* Brush cursor ring */
+        #editorBrushCursor {
+            position: absolute;
+            pointer-events: none;
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.8), inset 0 0 6px rgba(59, 130, 246, 0.5);
+            z-index: 100;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .hotkey-tag {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #93c5fd;
+            font-family: monospace;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .controls-card {
+                grid-template-columns: 1fr;
+            }
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+    <!-- Three.js for live 3D material preview -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Normal & ORM Map Generator</h1>
+        <p class="subtitle">Generate clean PBR maps with Proportional Shape Edge Masking, Mask Strength & Outside Opacity Control</p>
+        <div style="margin-top: 8px; font-size: 13px; color: var(--text-muted);">Created by <strong style="color: var(--accent);">Ashwath Jain</strong></div>
+    </header>
+
+    <!-- Drag and drop zone -->
+    <div class="drop-zone" id="dropZone">
+        <svg class="drop-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+        </svg>
+        <div class="drop-text">Drag & Drop Your Texture Image Here</div>
+        <div class="drop-subtext">Supports PNG, JPG, JPEG, WebP, etc. (Or click to browse)</div>
+        <input type="file" id="fileInput" accept="image/*">
+    </div>
+
+    <!-- Sliders and Actions -->
+    <div class="controls-card">
+        <div class="slider-group">
+            <div class="slider-header">
+                <span>Normal & AO Intensity</span>
+                <span class="slider-val" id="intensityVal">2.0x</span>
+            </div>
+            <input type="range" id="intensitySlider" min="0.1" max="5.0" step="0.1" value="2.0">
+        </div>
+
+        <div class="slider-group">
+            <div class="slider-header">
+                <span>Blur & Smoothness</span>
+                <span class="slider-val" id="blurVal">2.0 px</span>
+            </div>
+            <input type="range" id="blurSlider" min="0.0" max="6.0" step="0.2" value="2.0">
+        </div>
+
+        <div class="slider-group">
+            <div class="slider-header">
+                <span>Shape Mode</span>
+                <span class="slider-val" id="shapeTypeVal">Auto Island</span>
+            </div>
+            <div class="segmented-btn-group" id="shapeTypeGroup">
+                <button class="seg-btn active" data-shape="auto">✨ Auto</button>
+                <button class="seg-btn" data-shape="cube">🔲 Cube/Box</button>
+                <button class="seg-btn" data-shape="circle">🔘 Circle/Cyl</button>
+            </div>
+        </div>
+
+        <div class="slider-group">
+            <div class="slider-header">
+                <span title="Width of proportional edge fade from 100% reduction at boundary to 0% inside">Edge Mask Inset (Width)</span>
+                <span class="slider-val" id="shapeEdgeVal">10 px</span>
+            </div>
+            <input type="range" id="shapeEdgeSlider" min="0" max="100" step="1" value="10">
+        </div>
+
+        <div class="slider-group">
+            <div class="slider-header">
+                <span title="Controls how strongly edge bevels are flattened (100% down to 0% falloff)">Mask Strength</span>
+                <span class="slider-val" id="maskStrengthVal">100%</span>
+            </div>
+            <input type="range" id="maskStrengthSlider" min="0.0" max="1.0" step="0.05" value="1.0">
+        </div>
+
+        <div class="slider-group">
+            <div class="slider-header">
+                <span title="Normal map strength for regions outside the shape mask (0% = neutral flat 128,128,255)">Outside Normal Opacity</span>
+                <span class="slider-val" id="outsideOpacityVal">0% (Flat)</span>
+            </div>
+            <input type="range" id="outsideOpacitySlider" min="0.0" max="1.0" step="0.05" value="0.0">
+        </div>
+
+        <div class="slider-group">
+            <div class="slider-header">
+                <span>Download Export Size</span>
+                <span class="slider-val" id="exportSizeVal">512 × 512 px</span>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <select id="exportSizeSelect" class="custom-select">
+                    <option value="512" selected>512 × 512 px (Game Ready)</option>
+                    <option value="original">Original Image Size</option>
+                    <option value="256">256 × 256 px</option>
+                    <option value="1024">1024 × 1024 px</option>
+                    <option value="2048">2048 × 2048 px</option>
+                    <option value="custom">Custom Size...</option>
+                </select>
+                <div id="customSizeInputs" style="display: none; align-items: center; gap: 4px;">
+                    <input type="number" id="customWidth" value="512" min="16" max="4096" style="width: 60px; padding: 6px 4px; border-radius: 6px; background: var(--bg-card); border: 1px solid var(--border); color: #fff; text-align: center; font-size: 12px;">
+                    <span style="color: var(--text-muted); font-size: 12px;">×</span>
+                    <input type="number" id="customHeight" value="512" min="16" max="4096" style="width: 60px; padding: 6px 4px; border-radius: 6px; background: var(--bg-card); border: 1px solid var(--border); color: #fff; text-align: center; font-size: 12px;">
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <label style="font-size: 13px; color: #93c5fd; display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600;">
+                    <input type="checkbox" id="showMaskOverlayCheck"> 👁️ Show Edge Mask Gradient
+                </label>
+            </div>
+            <button class="btn btn-success" id="downloadAllBtn" disabled>
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                Download Both Maps
+            </button>
+        </div>
+    </div>
+
+    <!-- Previews -->
+    <div class="preview-grid">
+        <!-- Original Texture -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Base Texture</span>
+                <span class="badge badge-orig">Input</span>
+            </div>
+            <div class="card-body">
+                <canvas id="origCanvas"></canvas>
+            </div>
+            <div class="card-footer">
+                <span class="info-text" id="origInfo">Waiting for image...</span>
+            </div>
+        </div>
+
+        <!-- Normal Map with Open Editor Button -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Normal Map</span>
+                <span class="badge badge-norm">Normal</span>
+            </div>
+            <div class="card-body">
+                <canvas id="normalCanvas"></canvas>
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-secondary" id="openEditorBtn" style="padding: 6px 12px; font-size: 12px;" disabled title="Open full-screen Normal canvas to zoom, pan, and manually erase normals">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                    </svg>
+                    Erase Normals in Editor
+                </button>
+                <button class="btn" id="downloadNormalBtn" style="padding: 6px 12px; font-size: 12px;" disabled>Download</button>
+            </div>
+        </div>
+
+        <!-- ORM Map -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">ORM Map (AO, Rough, Metal)</span>
+                <span class="badge badge-orm">R:AO | G:Rough | B:Metal</span>
+            </div>
+            <div class="card-body">
+                <canvas id="ormCanvas"></canvas>
+            </div>
+            <div class="card-footer">
+                <span class="info-text" id="ormInfo">Packed PBR</span>
+                <button class="btn" id="downloadOrmBtn" style="padding: 6px 12px; font-size: 12px;" disabled>Download</button>
+            </div>
+        </div>
+
+        <!-- 3D Live Preview -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">3D Live Preview</span>
+                <div class="shape-switcher">
+                    <button class="shape-btn" data-shape="sphere">Sphere</button>
+                    <button class="shape-btn active" data-shape="cube">Cube</button>
+                    <button class="shape-btn" data-shape="cylinder">Cylinder</button>
+                    <button class="shape-btn" data-shape="plane">Plane</button>
+                </div>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                <div id="viewport-3d"></div>
+            </div>
+            <div class="card-footer">
+                <span class="info-text">Rotate: Left-drag | Zoom: Scroll</span>
+            </div>
+        </div>
+    </div>
+    <footer style="text-align: center; margin-top: 12px; padding: 18px 0; color: var(--text-muted); font-size: 13px; border-top: 1px solid var(--border);">
+        <p><strong>PBR Normal &amp; ORM Map Generator</strong> &bull; Created by <a href="https://github.com/ashwathjain" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: none; font-weight: 600;">Ashwath Jain</a></p>
+    </footer>
+</div>
+
+<!-- ------------------------------------------------------------- -->
+<!-- Fullscreen / Pop-up Normal Map Canvas Editor Modal           -->
+<!-- ------------------------------------------------------------- -->
+<div class="modal-overlay" id="editorModal">
+    <div class="modal-header">
+        <div class="modal-title-group">
+            <span class="modal-title">Normal Map Canvas Editor</span>
+            <span class="badge badge-norm">Pan & Zoom & Erase</span>
+            <span class="info-text" id="editorZoomVal" style="color: #60a5fa;">100%</span>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <button class="btn btn-secondary" id="editorFitBtn" style="padding: 6px 12px; font-size: 12px;">Fit to Screen</button>
+            <button class="btn btn-success" id="editorDoneBtn" style="padding: 6px 16px; font-size: 13px;">Done / Apply</button>
+        </div>
+    </div>
+
+    <div class="modal-toolbar">
+        <div class="tool-group">
+            <span class="tool-label">Tool:</span>
+            <div class="segmented-btn-group">
+                <button class="seg-btn" id="editorToolPan" title="Pan around canvas (or hold Space)">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"/>
+                    </svg>
+                    Pan
+                </button>
+                <button class="seg-btn active" id="editorToolErase" title="Erase normal bumps/details into flat (128,128,255)">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    🧹 Erase Normal
+                </button>
+                <button class="seg-btn" id="editorToolRestore" title="Restore original normal details">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    ↩️ Restore Normal
+                </button>
+            </div>
+        </div>
+
+        <div class="tool-group">
+            <div class="mini-slider">
+                <span class="tool-label">Brush Size:</span>
+                <input type="range" id="modalBrushSize" min="5" max="150" step="1" value="35">
+                <span class="slider-val" id="modalBrushSizeVal">35px</span>
+            </div>
+
+            <div class="mini-slider">
+                <span class="tool-label">Strength:</span>
+                <input type="range" id="modalBrushStrength" min="0.1" max="1.0" step="0.05" value="1.0">
+                <span class="slider-val" id="modalBrushStrengthVal">100%</span>
+            </div>
+        </div>
+
+        <div class="tool-group">
+            <div class="mini-slider">
+                <span class="tool-label" title="Mask shape edges proportionally">Shape Inset:</span>
+                <input type="range" id="modalShapeEdge" min="0" max="100" step="1" value="10">
+                <span class="slider-val" id="modalShapeEdgeVal">10px</span>
+            </div>
+        </div>
+
+        <div class="tool-group">
+            <div class="mini-slider">
+                <span class="tool-label" title="Show base texture under normal map for easy tracing">Base Overlay:</span>
+                <input type="range" id="modalOverlayOpacity" min="0.0" max="0.8" step="0.05" value="0.0">
+                <span class="slider-val" id="modalOverlayVal">0%</span>
+            </div>
+        </div>
+
+        <div class="tool-group" style="margin-left: auto;">
+            <button class="btn btn-secondary" id="modalResetBtn" style="padding: 6px 12px; font-size: 12px;" title="Reset all erased normals">
+                🔄 Reset All Erasures
+            </button>
+        </div>
+    </div>
+
+    <!-- Pannable & Zoomable Viewport -->
+    <div class="editor-viewport" id="editorViewport">
+        <div id="editorStage">
+            <canvas id="editorCanvas"></canvas>
+        </div>
+        <div id="editorBrushCursor"></div>
+    </div>
+
+    <div class="modal-footer">
+        <span><strong>Controls:</strong> <span class="hotkey-tag">Scroll</span> Zoom | <span class="hotkey-tag">Space + Drag</span> or <span class="hotkey-tag">Middle-Click</span> Pan | <span class="hotkey-tag">[ / ]</span> Brush Size | <span class="hotkey-tag">B</span> Erase | <span class="hotkey-tag">E</span> Restore | <span class="hotkey-tag">ESC</span> Close</span>
+        <span id="editorCoordInfo">0, 0 px</span>
+    </div>
+</div>
+
+<script>
+    // State
+    let loadedImage = null;
+    let fileName = "texture";
+
+    // Brush Mask (Float32Array: 0.0 = calculated normal, 1.0 = flat normal rgb(128,128,255))
+    let brushMask = null;
+    let imageWidth = 0;
+    let imageHeight = 0;
+    let baseHeightMap = null;
+    let blurredHeightMap = null;
+    let shapeDistanceField = null;
+    let currentShapeMode = 'auto'; // 'auto', 'cube', 'circle'
+
+    // Elements
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const intensitySlider = document.getElementById('intensitySlider');
+    const blurSlider = document.getElementById('blurSlider');
+    const shapeEdgeSlider = document.getElementById('shapeEdgeSlider');
+    const maskStrengthSlider = document.getElementById('maskStrengthSlider');
+    const outsideOpacitySlider = document.getElementById('outsideOpacitySlider');
+    const showMaskOverlayCheck = document.getElementById('showMaskOverlayCheck');
+    const shapeTypeGroup = document.getElementById('shapeTypeGroup');
+    
+    const intensityVal = document.getElementById('intensityVal');
+    const blurVal = document.getElementById('blurVal');
+    const shapeTypeVal = document.getElementById('shapeTypeVal');
+    const shapeEdgeVal = document.getElementById('shapeEdgeVal');
+    const maskStrengthVal = document.getElementById('maskStrengthVal');
+    const outsideOpacityVal = document.getElementById('outsideOpacityVal');
+
+    const exportSizeSelect = document.getElementById('exportSizeSelect');
+    const exportSizeVal = document.getElementById('exportSizeVal');
+    const customSizeInputs = document.getElementById('customSizeInputs');
+    const customWidth = document.getElementById('customWidth');
+    const customHeight = document.getElementById('customHeight');
+    
+    const origCanvas = document.getElementById('origCanvas');
+    const normalCanvas = document.getElementById('normalCanvas');
+    const ormCanvas = document.getElementById('ormCanvas');
+
+    const downloadAllBtn = document.getElementById('downloadAllBtn');
+    const downloadNormalBtn = document.getElementById('downloadNormalBtn');
+    const downloadOrmBtn = document.getElementById('downloadOrmBtn');
+    const openEditorBtn = document.getElementById('openEditorBtn');
+    const origInfo = document.getElementById('origInfo');
+
+    // Drag and drop handlers
+    dropZone.addEventListener('click', () => fileInput.click());
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+        });
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        const files = e.dataTransfer.files;
+        if (files.length > 0) handleFile(files[0]);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) handleFile(e.target.files[0]);
+    });
+
+    function handleFile(file) {
+        if (!file.type.startsWith('image/')) {
+            alert('Please drop an image file (PNG, JPG, WebP, etc.)');
+            return;
+        }
+        fileName = file.name.replace(/\.[^/.]+$/, "");
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                loadedImage = img;
+                imageWidth = img.width;
+                imageHeight = img.height;
+                brushMask = new Float32Array(imageWidth * imageHeight);
+                origInfo.textContent = `${img.width} × ${img.height} px`;
+                updateExportSizeLabel();
+                computeShapeDistanceField();
+                processTextures();
+                downloadAllBtn.disabled = false;
+                downloadNormalBtn.disabled = false;
+                downloadOrmBtn.disabled = false;
+                openEditorBtn.disabled = false;
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Export Size Selector Handlers
+    exportSizeSelect.addEventListener('change', () => {
+        if (exportSizeSelect.value === 'custom') {
+            customSizeInputs.style.display = 'inline-flex';
+        } else {
+            customSizeInputs.style.display = 'none';
+        }
+        updateExportSizeLabel();
+    });
+
+    [customWidth, customHeight].forEach(input => {
+        input.addEventListener('input', updateExportSizeLabel);
+    });
+
+    function updateExportSizeLabel() {
+        const mode = exportSizeSelect.value;
+        if (mode === 'original') {
+            if (loadedImage) {
+                exportSizeVal.textContent = `${imageWidth} × ${imageHeight} px`;
+            } else {
+                exportSizeVal.textContent = 'Original Size';
+            }
+        } else if (mode === 'custom') {
+            const w = parseInt(customWidth.value) || 512;
+            const h = parseInt(customHeight.value) || 512;
+            exportSizeVal.textContent = `${w} × ${h} px`;
+        } else {
+            const s = parseInt(mode) || 512;
+            exportSizeVal.textContent = `${s} × ${s} px`;
+        }
+    }
+
+    function getExportDimensions(sourceCanvas) {
+        const mode = exportSizeSelect.value;
+        if (mode === 'original') {
+            return { width: sourceCanvas.width, height: sourceCanvas.height };
+        } else if (mode === 'custom') {
+            const w = parseInt(customWidth.value) || 512;
+            const h = parseInt(customHeight.value) || 512;
+            return { width: w, height: h };
+        } else {
+            const size = parseInt(mode) || 512;
+            return { width: size, height: size };
+        }
+    }
+
+    // Shape Mode Switcher (Auto, Cube, Circle)
+    shapeTypeGroup.querySelectorAll('.seg-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            shapeTypeGroup.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentShapeMode = btn.dataset.shape;
+            if (currentShapeMode === 'auto') shapeTypeVal.textContent = 'Auto Island';
+            else if (currentShapeMode === 'cube') shapeTypeVal.textContent = 'Cube / Box';
+            else if (currentShapeMode === 'circle') shapeTypeVal.textContent = 'Circle / Cylinder';
+            computeShapeDistanceField();
+            if (loadedImage) processTextures();
+        });
+    });
+
+    // Sliders
+    intensitySlider.addEventListener('input', () => {
+        intensityVal.textContent = parseFloat(intensitySlider.value).toFixed(1) + 'x';
+        if (loadedImage) processTextures();
+    });
+
+    blurSlider.addEventListener('input', () => {
+        blurVal.textContent = parseFloat(blurSlider.value).toFixed(1) + ' px';
+        if (loadedImage) processTextures();
+    });
+
+    shapeEdgeSlider.addEventListener('input', () => {
+        const v = parseInt(shapeEdgeSlider.value);
+        shapeEdgeVal.textContent = v === 0 ? '0 px (Off)' : v + ' px';
+        if (modalShapeEdge) {
+            modalShapeEdge.value = v;
+            modalShapeEdgeVal.textContent = v === 0 ? '0px' : v + 'px';
+        }
+        if (loadedImage) processTextures();
+    });
+
+    maskStrengthSlider.addEventListener('input', () => {
+        const v = parseFloat(maskStrengthSlider.value);
+        maskStrengthVal.textContent = Math.round(v * 100) + '%';
+        if (loadedImage) processTextures();
+    });
+
+    outsideOpacitySlider.addEventListener('input', () => {
+        const v = parseFloat(outsideOpacitySlider.value);
+        outsideOpacityVal.textContent = v === 0 ? '0% (Flat)' : Math.round(v * 100) + '%';
+        if (loadedImage) processTextures();
+    });
+
+    showMaskOverlayCheck.addEventListener('change', () => {
+        if (loadedImage) processTextures();
+    });
+
+    // Gaussian blur on 1D Float32Array
+    function gaussianBlur(data, width, height, radius) {
+        if (radius <= 0.05) return new Float32Array(data);
+        
+        const size = Math.ceil(radius * 3) * 2 + 1;
+        const kernel = new Float32Array(size);
+        const half = Math.floor(size / 2);
+        let sum = 0;
+        const sigma2 = 2 * radius * radius;
+
+        for (let i = 0; i < size; i++) {
+            const x = i - half;
+            const g = Math.exp(-(x * x) / sigma2);
+            kernel[i] = g;
+            sum += g;
+        }
+        for (let i = 0; i < size; i++) kernel[i] /= sum;
+
+        const temp = new Float32Array(width * height);
+        const output = new Float32Array(width * height);
+
+        // Horizontal pass
+        for (let y = 0; y < height; y++) {
+            const yOffset = y * width;
+            for (let x = 0; x < width; x++) {
+                let v = 0;
+                for (let k = 0; k < size; k++) {
+                    const px = Math.min(width - 1, Math.max(0, x + k - half));
+                    v += data[yOffset + px] * kernel[k];
+                }
+                temp[yOffset + x] = v;
+            }
+        }
+
+        // Vertical pass
+        for (let x = 0; x < width; x++) {
+            for (let y = 0; y < height; y++) {
+                let v = 0;
+                for (let k = 0; k < size; k++) {
+                    const py = Math.min(height - 1, Math.max(0, y + k - half));
+                    v += temp[py * width + x] * kernel[k];
+                }
+                output[y * width + x] = v;
+            }
+        }
+
+        return output;
+    }
+
+    // -------------------------------------------------------------
+    // Shape & Edge Distance Field Detection (Auto / Cube / Circle)
+    // -------------------------------------------------------------
+    function computeShapeDistanceField() {
+        if (!loadedImage) return;
+        const w = imageWidth;
+        const h = imageHeight;
+
+        shapeDistanceField = new Float32Array(w * h);
+
+        if (currentShapeMode === 'cube') {
+            // Cube / Box Grid: calculates exact Euclidean distance from all 4 borders
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const distBorder = Math.min(x, w - 1 - x, y, h - 1 - y);
+                    shapeDistanceField[y * w + x] = distBorder;
+                }
+            }
+            return;
+        }
+
+        if (currentShapeMode === 'circle') {
+            // Circle / Cylinder Caps: calculates radial distance from center
+            const cx = w / 2;
+            const cy = h / 2;
+            const radius = Math.min(w, h) / 2;
+
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const distCenter = Math.hypot(x - cx + 0.5, y - cy + 0.5);
+                    if (distCenter >= radius) {
+                        shapeDistanceField[y * w + x] = -1.0; // Outside circle
+                    } else {
+                        shapeDistanceField[y * w + x] = radius - distCenter; // 0.0 at rim, increasing inward
+                    }
+                }
+            }
+            return;
+        }
+
+        // AUTO MODE: Robust UV Island, Alpha & Seam Distance Transform
+        const origCtx = origCanvas.getContext('2d');
+        origCanvas.width = w;
+        origCanvas.height = h;
+        origCtx.drawImage(loadedImage, 0, 0);
+        const srcData = origCtx.getImageData(0, 0, w, h).data;
+
+        const isOutside = new Uint8Array(w * h);
+        let hasOutside = false;
+
+        for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+                const idx = y * w + x;
+                const pIdx = idx * 4;
+                const r = srcData[pIdx];
+                const g = srcData[pIdx + 1];
+                const b = srcData[pIdx + 2];
+                const a = srcData[pIdx + 3];
+                const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+
+                if (a < 128 || lum < 10) {
+                    isOutside[idx] = 1;
+                    hasOutside = true;
+                }
+            }
+        }
+
+        const INF = 99999.0;
+
+        if (hasOutside) {
+            // Boundary pixels are opaque shape pixels directly adjacent to outside or canvas borders
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const idx = y * w + x;
+                    if (isOutside[idx]) {
+                        shapeDistanceField[idx] = -1.0;
+                    } else {
+                        let isEdge = (x === 0 || x === w - 1 || y === 0 || y === h - 1);
+                        if (!isEdge) {
+                            if (isOutside[idx - 1] || isOutside[idx + 1] ||
+                                isOutside[idx - w] || isOutside[idx + w]) {
+                                isEdge = true;
+                            }
+                        }
+                        shapeDistanceField[idx] = isEdge ? 0.0 : INF;
+                    }
+                }
+            }
+        } else {
+            // Fully opaque image: 4 image borders & internal sharp UV seams are boundary (d = 0.0)
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const idx = y * w + x;
+                    let isEdge = (x === 0 || x === w - 1 || y === 0 || y === h - 1);
+
+                    if (!isEdge) {
+                        const pIdx = idx * 4;
+                        const rightIdx = pIdx + 4;
+                        const downIdx = (idx + w) * 4;
+                        const diffR = Math.abs(srcData[pIdx] - srcData[rightIdx]) +
+                                      Math.abs(srcData[pIdx + 1] - srcData[rightIdx + 1]) +
+                                      Math.abs(srcData[pIdx + 2] - srcData[rightIdx + 2]);
+                        const diffD = Math.abs(srcData[pIdx] - srcData[downIdx]) +
+                                      Math.abs(srcData[pIdx + 1] - srcData[downIdx + 1]) +
+                                      Math.abs(srcData[pIdx + 2] - srcData[downIdx + 2]);
+                        if (diffR > 180 || diffD > 180) {
+                            isEdge = true;
+                        }
+                    }
+
+                    shapeDistanceField[idx] = isEdge ? 0.0 : INF;
+                }
+            }
+        }
+
+        // Pass 1: Top-Left to Bottom-Right
+        for (let y = 0; y < h; y++) {
+            const yOffset = y * w;
+            for (let x = 0; x < w; x++) {
+                const idx = yOffset + x;
+                if (shapeDistanceField[idx] >= 0.0) {
+                    let d = shapeDistanceField[idx];
+                    if (x > 0 && shapeDistanceField[idx - 1] >= 0.0) {
+                        d = Math.min(d, shapeDistanceField[idx - 1] + 1.0);
+                    }
+                    if (y > 0 && shapeDistanceField[idx - w] >= 0.0) {
+                        d = Math.min(d, shapeDistanceField[idx - w] + 1.0);
+                    }
+                    if (x > 0 && y > 0 && shapeDistanceField[idx - w - 1] >= 0.0) {
+                        d = Math.min(d, shapeDistanceField[idx - w - 1] + 1.414);
+                    }
+                    if (x < w - 1 && y > 0 && shapeDistanceField[idx - w + 1] >= 0.0) {
+                        d = Math.min(d, shapeDistanceField[idx - w + 1] + 1.414);
+                    }
+                    shapeDistanceField[idx] = d;
+                }
+            }
+        }
+
+        // Pass 2: Bottom-Right to Top-Left
+        for (let y = h - 1; y >= 0; y--) {
+            const yOffset = y * w;
+            for (let x = w - 1; x >= 0; x--) {
+                const idx = yOffset + x;
+                if (shapeDistanceField[idx] >= 0.0) {
+                    let d = shapeDistanceField[idx];
+                    if (x < w - 1 && shapeDistanceField[idx + 1] >= 0.0) {
+                        d = Math.min(d, shapeDistanceField[idx + 1] + 1.0);
+                    }
+                    if (y < h - 1 && shapeDistanceField[idx + w] >= 0.0) {
+                        d = Math.min(d, shapeDistanceField[idx + w] + 1.0);
+                    }
+                    if (x < w - 1 && y < h - 1 && shapeDistanceField[idx + w + 1] >= 0.0) {
+                        d = Math.min(d, shapeDistanceField[idx + w + 1] + 1.414);
+                    }
+                    if (x > 0 && y < h - 1 && shapeDistanceField[idx + w - 1] >= 0.0) {
+                        d = Math.min(d, shapeDistanceField[idx + w - 1] + 1.414);
+                    }
+                    shapeDistanceField[idx] = d;
+                }
+            }
+        }
+    }
+
+    // Core Processing Engine
+    function processTextures() {
+        if (!loadedImage) return;
+
+        const w = loadedImage.width;
+        const h = loadedImage.height;
+        const intensity = parseFloat(intensitySlider.value);
+        const blurRadius = parseFloat(blurSlider.value);
+        const shapeInset = parseInt(shapeEdgeSlider.value);
+        const maskStrength = parseFloat(maskStrengthSlider.value);
+        const outsideOpacity = parseFloat(outsideOpacitySlider.value);
+        const showOverlay = showMaskOverlayCheck.checked;
+
+        if (!brushMask || brushMask.length !== w * h) {
+            brushMask = new Float32Array(w * h);
+        }
+
+        if (!shapeDistanceField || shapeDistanceField.length !== w * h) {
+            computeShapeDistanceField();
+        }
+
+        // Resize canvases
+        [origCanvas, normalCanvas, ormCanvas].forEach(c => {
+            c.width = w;
+            c.height = h;
+        });
+
+        // 1. Draw Original
+        const origCtx = origCanvas.getContext('2d');
+        origCtx.drawImage(loadedImage, 0, 0);
+        const srcImgData = origCtx.getImageData(0, 0, w, h);
+        const srcData = srcImgData.data;
+
+        // 2. Build Heightmap (Luminance)
+        baseHeightMap = new Float32Array(w * h);
+        for (let i = 0; i < w * h; i++) {
+            const idx = i * 4;
+            baseHeightMap[i] = (0.299 * srcData[idx] + 0.587 * srcData[idx + 1] + 0.114 * srcData[idx + 2]) / 255.0;
+        }
+
+        // 3. Apply Gaussian Blur to Heightmap
+        blurredHeightMap = gaussianBlur(baseHeightMap, w, h, blurRadius);
+
+        // 4. Generate Normal Map (Sobel filter + Proportional Shape Edge Inset + Mask Strength + Outside Opacity)
+        const normCtx = normalCanvas.getContext('2d');
+        const normImgData = normCtx.createImageData(w, h);
+        const normData = normImgData.data;
+
+        // 5. Generate ORM Map (R: Ambient Occlusion, G: Roughness, B: Metallic)
+        const ormCtx = ormCanvas.getContext('2d');
+        const ormImgData = ormCtx.createImageData(w, h);
+        const ormData = ormImgData.data;
+
+        const S = intensity * 4.0;
+
+        for (let y = 0; y < h; y++) {
+            const y0 = Math.max(0, y - 1);
+            const y1 = Math.min(h - 1, y + 1);
+
+            for (let x = 0; x < w; x++) {
+                const x0 = Math.max(0, x - 1);
+                const x1 = Math.min(w - 1, x + 1);
+
+                // Sobel 3x3
+                const z00 = blurredHeightMap[y0 * w + x0];
+                const z01 = blurredHeightMap[y0 * w + x];
+                const z02 = blurredHeightMap[y0 * w + x1];
+
+                const z10 = blurredHeightMap[y * w + x0];
+                const z12 = blurredHeightMap[y * w + x1];
+
+                const z20 = blurredHeightMap[y1 * w + x0];
+                const z21 = blurredHeightMap[y1 * w + x];
+                const z22 = blurredHeightMap[y1 * w + x1];
+
+                let dx = (z02 + 2 * z12 + z22) - (z00 + 2 * z10 + z20);
+                let dy = (z20 + 2 * z21 + z22) - (z00 + 2 * z01 + z02);
+
+                // Calculate Proportional Shape Edge Factor (100% reduction at 0px edge -> 0% inside)
+                let edgeFactor = 1.0;
+                if (shapeDistanceField) {
+                    const d = shapeDistanceField[y * w + x];
+                    if (d < 0.0) {
+                        // Pixel is outside the shape (background)
+                        edgeFactor = outsideOpacity;
+                    } else if (shapeInset <= 0) {
+                        // Inset is 0px: shape interior remains 100% normal
+                        edgeFactor = 1.0;
+                    } else if (d >= shapeInset) {
+                        // Beyond inset width: interior remains 100% normal
+                        edgeFactor = 1.0;
+                    } else {
+                        // Proportional smoothstep ramp: d=0.0 (edge) -> 0.0 ramp, d=shapeInset -> 1.0 ramp
+                        const t = Math.max(0.0, Math.min(1.0, d / shapeInset));
+                        const ramp = t * t * (3.0 - 2.0 * t);
+                        const edgeReduction = (1.0 - ramp) * maskStrength;
+                        edgeFactor = (1.0 - edgeReduction) + (outsideOpacity * edgeReduction);
+                    }
+                }
+
+                dx *= edgeFactor;
+                dy *= edgeFactor;
+
+                // Normal vector
+                let nx = -dx * S;
+                let ny = dy * S; // OpenGL Standard
+                let nz = 1.0;
+
+                let len = Math.sqrt(nx * nx + ny * ny + nz * nz);
+                nx /= len;
+                ny /= len;
+                nz /= len;
+
+                // Apply Manual Erase Brush Mask
+                const maskVal = brushMask[y * w + x];
+                if (maskVal > 0) {
+                    const invMask = 1.0 - maskVal;
+                    nx = nx * invMask;
+                    ny = ny * invMask;
+                    nz = nz * invMask + maskVal;
+                    len = Math.sqrt(nx * nx + ny * ny + nz * nz);
+                    nx /= len;
+                    ny /= len;
+                    nz /= len;
+                }
+
+                const pIdx = (y * w + x) * 4;
+
+                // Normal Map [0..255]
+                let rNorm = Math.round((nx * 0.5 + 0.5) * 255);
+                let gNorm = Math.round((ny * 0.5 + 0.5) * 255);
+                let bNorm = Math.round((nz * 0.5 + 0.5) * 255);
+
+                // Visual Mask Overlay (if checked)
+                if (showOverlay) {
+                    const maskIntensity = 1.0 - edgeFactor;
+                    if (maskIntensity > 0.02) {
+                        rNorm = Math.min(255, rNorm + Math.round(maskIntensity * 110));
+                        gNorm = Math.max(0, gNorm - Math.round(maskIntensity * 50));
+                        bNorm = Math.max(0, bNorm - Math.round(maskIntensity * 50));
+                    }
+                }
+
+                normData[pIdx] = rNorm;
+                normData[pIdx + 1] = gNorm;
+                normData[pIdx + 2] = bNorm;
+                normData[pIdx + 3] = 255;
+
+                // ORM Map:
+                // R: Ambient Occlusion
+                const centerH = blurredHeightMap[y * w + x];
+                const avgNeighbor = (z00 + z01 + z02 + z10 + z12 + z20 + z21 + z22) / 8.0;
+                let curvature = (centerH - avgNeighbor) * intensity;
+                if (maskVal > 0) curvature *= (1.0 - maskVal);
+                const ao = Math.min(1.0, Math.max(0.0, 0.75 + curvature * 2.0));
+
+                // G: Roughness
+                const gradMag = Math.sqrt(dx * dx + dy * dy);
+                const roughnessGrad = gradMag * (1.0 - maskVal);
+                const roughness = Math.min(1.0, Math.max(0.2, (1.0 - centerH * 0.3) * 0.7 + roughnessGrad * (intensity * 0.6)));
+
+                // B: Metallic
+                const metallic = 0.0;
+
+                ormData[pIdx] = Math.round(ao * 255);
+                ormData[pIdx + 1] = Math.round(roughness * 255);
+                ormData[pIdx + 2] = Math.round(metallic * 255);
+                ormData[pIdx + 3] = 255;
+            }
+        }
+
+        normCtx.putImageData(normImgData, 0, 0);
+        ormCtx.putImageData(ormImgData, 0, 0);
+
+        // Update Editor Canvas if open
+        if (editorModal.classList.contains('active')) {
+            renderEditorCanvas();
+        }
+
+        // Update 3D Preview
+        update3DMaterial();
+    }
+
+    // Download helpers with High-Quality Resampling
+    function downloadCanvas(canvas, filename) {
+        const targetDim = getExportDimensions(canvas);
+        let exportCanvas = canvas;
+
+        if (canvas.width !== targetDim.width || canvas.height !== targetDim.height) {
+            const offscreen = document.createElement('canvas');
+            offscreen.width = targetDim.width;
+            offscreen.height = targetDim.height;
+            const ctx = offscreen.getContext('2d');
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(canvas, 0, 0, targetDim.width, targetDim.height);
+            exportCanvas = offscreen;
+        }
+
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = exportCanvas.toDataURL('image/png');
+        link.click();
+    }
+
+    downloadNormalBtn.addEventListener('click', () => {
+        downloadCanvas(normalCanvas, `${fileName}_Normal.png`);
+    });
+
+    downloadOrmBtn.addEventListener('click', () => {
+        downloadCanvas(ormCanvas, `${fileName}_ORM.png`);
+    });
+
+    downloadAllBtn.addEventListener('click', () => {
+        downloadCanvas(normalCanvas, `${fileName}_Normal.png`);
+        setTimeout(() => {
+            downloadCanvas(ormCanvas, `${fileName}_ORM.png`);
+        }, 300);
+    });
+
+    // -------------------------------------------------------------
+    // Fullscreen Normal Map Canvas Editor Modal & Pan/Zoom Engine
+    // -------------------------------------------------------------
+    const editorModal = document.getElementById('editorModal');
+    const editorViewport = document.getElementById('editorViewport');
+    const editorStage = document.getElementById('editorStage');
+    const editorCanvas = document.getElementById('editorCanvas');
+    const editorBrushCursor = document.getElementById('editorBrushCursor');
+    const editorZoomVal = document.getElementById('editorZoomVal');
+    const editorCoordInfo = document.getElementById('editorCoordInfo');
+    const editorFitBtn = document.getElementById('editorFitBtn');
+    const editorDoneBtn = document.getElementById('editorDoneBtn');
+
+    const editorToolPan = document.getElementById('editorToolPan');
+    const editorToolErase = document.getElementById('editorToolErase');
+    const editorToolRestore = document.getElementById('editorToolRestore');
+    const modalBrushSize = document.getElementById('modalBrushSize');
+    const modalBrushSizeVal = document.getElementById('modalBrushSizeVal');
+    const modalBrushStrength = document.getElementById('modalBrushStrength');
+    const modalBrushStrengthVal = document.getElementById('modalBrushStrengthVal');
+    const modalShapeEdge = document.getElementById('modalShapeEdge');
+    const modalShapeEdgeVal = document.getElementById('modalShapeEdgeVal');
+    const modalOverlayOpacity = document.getElementById('modalOverlayOpacity');
+    const modalOverlayVal = document.getElementById('modalOverlayVal');
+    const modalResetBtn = document.getElementById('modalResetBtn');
+
+    // Pan & Zoom state
+    let modalTool = 'erase'; // 'pan', 'erase', 'restore'
+    let modalSize = 35;
+    let modalStrength = 1.0;
+    let modalOverlay = 0.0;
+    let zoom = 1.0;
+    let panX = 0;
+    let panY = 0;
+    let isPanning = false;
+    let isDrawingModal = false;
+    let startPanX = 0;
+    let startPanY = 0;
+    let lastModalX = -1;
+    let lastModalY = -1;
+    let isSpacePressed = false;
+
+    openEditorBtn.addEventListener('click', () => {
+        if (!loadedImage) return;
+        editorModal.classList.add('active');
+        editorCanvas.width = imageWidth;
+        editorCanvas.height = imageHeight;
+        modalShapeEdge.value = shapeEdgeSlider.value;
+        modalShapeEdgeVal.textContent = shapeEdgeSlider.value === '0' ? '0px' : shapeEdgeSlider.value + 'px';
+        fitEditorToScreen();
+        setEditorTool('erase');
+        renderEditorCanvas();
+    });
+
+    editorDoneBtn.addEventListener('click', () => {
+        editorModal.classList.remove('active');
+        processTextures();
+    });
+
+    editorFitBtn.addEventListener('click', fitEditorToScreen);
+
+    function fitEditorToScreen() {
+        if (!imageWidth || !imageHeight) return;
+        const vpWidth = editorViewport.clientWidth - 60;
+        const vpHeight = editorViewport.clientHeight - 60;
+        const scaleX = vpWidth / imageWidth;
+        const scaleY = vpHeight / imageHeight;
+        zoom = Math.min(scaleX, scaleY, 2.0);
+        zoom = Math.max(zoom, 0.1);
+
+        panX = (editorViewport.clientWidth - imageWidth * zoom) / 2;
+        panY = (editorViewport.clientHeight - imageHeight * zoom) / 2;
+        updateEditorTransform();
+    }
+
+    function updateEditorTransform() {
+        editorStage.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+        editorZoomVal.textContent = Math.round(zoom * 100) + '%';
+        updateModalCursorSize();
+    }
+
+    function setEditorTool(t) {
+        modalTool = t;
+        [editorToolPan, editorToolErase, editorToolRestore].forEach(b => b.classList.remove('active'));
+        if (t === 'pan') {
+            editorToolPan.classList.add('active');
+            editorViewport.classList.add('pan-mode');
+            editorBrushCursor.style.display = 'none';
+        } else if (t === 'erase') {
+            editorToolErase.classList.add('active');
+            editorViewport.classList.remove('pan-mode');
+        } else if (t === 'restore') {
+            editorToolRestore.classList.add('active');
+            editorViewport.classList.remove('pan-mode');
+        }
+    }
+
+    editorToolPan.addEventListener('click', () => setEditorTool('pan'));
+    editorToolErase.addEventListener('click', () => setEditorTool('erase'));
+    editorToolRestore.addEventListener('click', () => setEditorTool('restore'));
+
+    modalBrushSize.addEventListener('input', () => {
+        modalSize = parseInt(modalBrushSize.value);
+        modalBrushSizeVal.textContent = modalSize + 'px';
+        updateModalCursorSize();
+    });
+
+    modalBrushStrength.addEventListener('input', () => {
+        modalStrength = parseFloat(modalBrushStrength.value);
+        modalBrushStrengthVal.textContent = Math.round(modalStrength * 100) + '%';
+    });
+
+    modalShapeEdge.addEventListener('input', () => {
+        const v = parseInt(modalShapeEdge.value);
+        modalShapeEdgeVal.textContent = v === 0 ? '0px' : v + 'px';
+        shapeEdgeSlider.value = v;
+        shapeEdgeVal.textContent = v === 0 ? '0 px (Off)' : v + ' px';
+        if (loadedImage) processTextures();
+    });
+
+    modalOverlayOpacity.addEventListener('input', () => {
+        modalOverlay = parseFloat(modalOverlayOpacity.value);
+        modalOverlayVal.textContent = Math.round(modalOverlay * 100) + '%';
+        renderEditorCanvas();
+    });
+
+    modalResetBtn.addEventListener('click', () => {
+        if (brushMask && confirm('Reset all manual brush erasures on this texture?')) {
+            brushMask.fill(0);
+            processTextures();
+        }
+    });
+
+    function updateModalCursorSize() {
+        if (modalTool === 'pan' || isSpacePressed) {
+            editorBrushCursor.style.display = 'none';
+            return;
+        }
+        const displayDiameter = (modalSize * 2) * zoom;
+        editorBrushCursor.style.width = displayDiameter + 'px';
+        editorBrushCursor.style.height = displayDiameter + 'px';
+    }
+
+    function renderEditorCanvas() {
+        if (!editorCanvas || !normalCanvas) return;
+        const ctx = editorCanvas.getContext('2d');
+        ctx.clearRect(0, 0, imageWidth, imageHeight);
+        ctx.drawImage(normalCanvas, 0, 0);
+
+        // Optional Base Texture Overlay to guide manual erasing
+        if (modalOverlay > 0 && origCanvas) {
+            ctx.save();
+            ctx.globalAlpha = modalOverlay;
+            ctx.drawImage(origCanvas, 0, 0);
+            ctx.restore();
+        }
+    }
+
+    // Convert mouse event coordinates to texture pixel coords
+    function getEditorImageCoords(e) {
+        const rect = editorViewport.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        const imgX = (mx - panX) / zoom;
+        const imgY = (my - panY) / zoom;
+        return { imgX, imgY, screenX: mx, screenY: my };
+    }
+
+    function paintModalCircle(cx, cy, radius, strength, isErase) {
+        if (!brushMask || !imageWidth || !imageHeight) return;
+
+        const r2 = radius * radius;
+        const minX = Math.max(0, Math.floor(cx - radius));
+        const maxX = Math.min(imageWidth - 1, Math.ceil(cx + radius));
+        const minY = Math.max(0, Math.floor(cy - radius));
+        const maxY = Math.min(imageHeight - 1, Math.ceil(cy + radius));
+
+        for (let y = minY; y <= maxY; y++) {
+            const dy = y - cy;
+            const dy2 = dy * dy;
+            const yOffset = y * imageWidth;
+
+            for (let x = minX; x <= maxX; x++) {
+                const dx = x - cx;
+                const d2 = dx * dx + dy2;
+                if (d2 <= r2) {
+                    const dist = Math.sqrt(d2);
+                    const falloff = 0.5 * (1 + Math.cos(Math.PI * (dist / radius)));
+                    const delta = strength * falloff;
+                    const idx = yOffset + x;
+
+                    if (isErase) {
+                        brushMask[idx] = Math.min(1.0, brushMask[idx] + delta);
+                    } else {
+                        brushMask[idx] = Math.max(0.0, brushMask[idx] - delta);
+                    }
+                }
+            }
+        }
+    }
+
+    function paintModalLine(x0, y0, x1, y1, radius, strength, isErase) {
+        const dist = Math.hypot(x1 - x0, y1 - y0);
+        const step = Math.max(1, radius * 0.25);
+        const steps = Math.ceil(dist / step);
+
+        for (let i = 0; i <= steps; i++) {
+            const t = steps === 0 ? 0 : i / steps;
+            const x = x0 + (x1 - x0) * t;
+            const y = y0 + (y1 - y0) * t;
+            paintModalCircle(x, y, radius, strength, isErase);
+        }
+    }
+
+    // Mouse Wheel Zoom
+    editorViewport.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const rect = editorViewport.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+
+        const zoomFactor = e.deltaY < 0 ? 1.15 : 0.87;
+        const newZoom = Math.max(0.1, Math.min(15.0, zoom * zoomFactor));
+
+        panX = mx - (mx - panX) * (newZoom / zoom);
+        panY = my - (my - panY) * (newZoom / zoom);
+        zoom = newZoom;
+
+        updateEditorTransform();
+    }, { passive: false });
+
+    // Pointer Down (Pan or Brush)
+    editorViewport.addEventListener('mousedown', (e) => {
+        if (!editorModal.classList.contains('active')) return;
+
+        // Middle mouse button or spacebar held -> Start Panning
+        if (e.button === 1 || isSpacePressed || modalTool === 'pan') {
+            isPanning = true;
+            startPanX = e.clientX - panX;
+            startPanY = e.clientY - panY;
+            editorViewport.classList.add('pan-mode');
+            return;
+        }
+
+        if (e.button === 0) { // Left click brush stroke
+            isDrawingModal = true;
+            const coords = getEditorImageCoords(e);
+            lastModalX = coords.imgX;
+            lastModalY = coords.imgY;
+            paintModalCircle(coords.imgX, coords.imgY, modalSize, modalStrength, modalTool === 'erase');
+            processTextures();
+        }
+    });
+
+    // Window Mouse Move
+    window.addEventListener('mousemove', (e) => {
+        if (!editorModal.classList.contains('active')) return;
+
+        const coords = getEditorImageCoords(e);
+        editorCoordInfo.textContent = `${Math.round(coords.imgX)}, ${Math.round(coords.imgY)} px`;
+
+        // Position brush cursor ring
+        if (modalTool !== 'pan' && !isSpacePressed && !isPanning) {
+            editorBrushCursor.style.display = 'block';
+            editorBrushCursor.style.left = coords.screenX + 'px';
+            editorBrushCursor.style.top = coords.screenY + 'px';
+            updateModalCursorSize();
+        } else {
+            editorBrushCursor.style.display = 'none';
+        }
+
+        // Panning drag
+        if (isPanning) {
+            panX = e.clientX - startPanX;
+            panY = e.clientY - startPanY;
+            updateEditorTransform();
+            return;
+        }
+
+        // Brush drag stroke
+        if (isDrawingModal) {
+            paintModalLine(lastModalX, lastModalY, coords.imgX, coords.imgY, modalSize, modalStrength, modalTool === 'erase');
+            lastModalX = coords.imgX;
+            lastModalY = coords.imgY;
+            processTextures();
+        }
+    });
+
+    // Window Mouse Up
+    window.addEventListener('mouseup', () => {
+        if (isPanning) {
+            isPanning = false;
+            if (modalTool !== 'pan' && !isSpacePressed) {
+                editorViewport.classList.remove('pan-mode');
+            }
+        }
+        isDrawingModal = false;
+        lastModalX = -1;
+        lastModalY = -1;
+    });
+
+    editorViewport.addEventListener('mouseenter', () => {
+        if (modalTool !== 'pan' && !isSpacePressed) editorBrushCursor.style.display = 'block';
+    });
+
+    editorViewport.addEventListener('mouseleave', () => {
+        if (!isDrawingModal) editorBrushCursor.style.display = 'none';
+    });
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+        if (!editorModal.classList.contains('active')) return;
+
+        if (e.key === 'Escape') {
+            editorModal.classList.remove('active');
+            processTextures();
+        }
+        if (e.code === 'Space' && !isSpacePressed) {
+            isSpacePressed = true;
+            editorViewport.classList.add('pan-mode');
+            editorBrushCursor.style.display = 'none';
+        }
+        if (e.key === 'b' || e.key === 'B') setEditorTool('erase');
+        if (e.key === 'e' || e.key === 'E') setEditorTool('restore');
+        if (e.key === 'p' || e.key === 'P') setEditorTool('pan');
+        if (e.key === '[') {
+            modalSize = Math.max(5, modalSize - 5);
+            modalBrushSize.value = modalSize;
+            modalBrushSizeVal.textContent = modalSize + 'px';
+            updateModalCursorSize();
+        }
+        if (e.key === ']') {
+            modalSize = Math.min(150, modalSize + 5);
+            modalBrushSize.value = modalSize;
+            modalBrushSizeVal.textContent = modalSize + 'px';
+            updateModalCursorSize();
+        }
+    });
+
+    window.addEventListener('keyup', (e) => {
+        if (e.code === 'Space') {
+            isSpacePressed = false;
+            if (modalTool !== 'pan') {
+                editorViewport.classList.remove('pan-mode');
+                editorBrushCursor.style.display = 'block';
+            }
+        }
+    });
+
+    // -------------------------------------------------------------
+    // 3D Live Viewport (Three.js)
+    // -------------------------------------------------------------
+    let scene, camera, renderer, material, mesh, controls;
+    let currentShape = 'cube';
+
+    const geometries = {
+        sphere: new THREE.SphereGeometry(1.0, 64, 64),
+        cube: new THREE.BoxGeometry(1.4, 1.4, 1.4, 32, 32, 32),
+        cylinder: new THREE.CylinderGeometry(0.85, 0.85, 1.6, 64, 32),
+        plane: new THREE.PlaneGeometry(1.8, 1.8, 32, 32)
+    };
+
+    function init3D() {
+        const container = document.getElementById('viewport-3d');
+        const width = container.clientWidth || 300;
+        const height = container.clientHeight || 280;
+
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0f1117);
+
+        camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+        camera.position.set(0, 0, 3.2);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(width, height);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        container.appendChild(renderer.domElement);
+
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 1.5;
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.2);
+        dirLight1.position.set(3, 4, 3);
+        scene.add(dirLight1);
+
+        const dirLight2 = new THREE.DirectionalLight(0x60a5fa, 0.6);
+        dirLight2.position.set(-3, -2, -3);
+        scene.add(dirLight2);
+
+        // Material & Mesh (Default Cube)
+        material = new THREE.MeshStandardMaterial({
+            color: 0xffffff,
+            roughness: 0.5,
+            metalness: 0.0
+        });
+
+        mesh = new THREE.Mesh(geometries.cube, material);
+        scene.add(mesh);
+
+        // Shape Switcher buttons
+        document.querySelectorAll('.shape-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                setShape(btn.dataset.shape);
+            });
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            const w = container.clientWidth;
+            const h = container.clientHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        });
+    }
+
+    function setShape(shapeName) {
+        if (!mesh || !geometries[shapeName]) return;
+        currentShape = shapeName;
+        mesh.geometry = geometries[shapeName];
+    }
+
+    function update3DMaterial() {
+        if (!mesh) return;
+
+        // Base Map Texture
+        const baseTex = new THREE.CanvasTexture(origCanvas);
+        baseTex.wrapS = THREE.RepeatWrapping;
+        baseTex.wrapT = THREE.RepeatWrapping;
+
+        // Normal Map Texture
+        const normTex = new THREE.CanvasTexture(normalCanvas);
+        normTex.wrapS = THREE.RepeatWrapping;
+        normTex.wrapT = THREE.RepeatWrapping;
+
+        // ORM Map Texture (Roughness & AO)
+        const ormTex = new THREE.CanvasTexture(ormCanvas);
+        ormTex.wrapS = THREE.RepeatWrapping;
+        ormTex.wrapT = THREE.RepeatWrapping;
+
+        material.map = baseTex;
+        material.normalMap = normTex;
+        material.normalScale = new THREE.Vector2(1.0, 1.0);
+        material.roughnessMap = ormTex;
+        material.aoMap = ormTex;
+        material.aoMapIntensity = 1.0;
+        material.needsUpdate = true;
+    }
+
+    // Initialize 3D when DOM ready
+    window.addEventListener('DOMContentLoaded', init3D);
+</script>
+</body>
+</html>
