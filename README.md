@@ -22,7 +22,7 @@
 ## 👨‍💻 Created By
 **Ashwath Jain**  
 - **GitHub:** [@ashwathjain](https://github.com/ashwathjain)  
-- **Email:** [jainashwath2002@gmail.com](mailto:jainashwath2002@gmail.com)
+- **Email:** [jainashwath10@gmail.com](mailto:jainashwath10@gmail.com)
 
 ---
 
