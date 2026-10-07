@@ -6,6 +6,7 @@
     <meta name="author" content="Ashwath Jain">
     <meta name="description" content="Standalone PBR Normal and ORM Map Generator with live 3D preview, edge masking, and canvas editor. Created by Ashwath Jain.">
     <title>PBR Texture Tool - Normal & ORM Generator</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <style>
         :root {
             --bg-primary: #12141a;
@@ -57,9 +58,7 @@
             font-size: 26px;
             font-weight: 700;
             letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #60a5fa, #a855f7);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #ffffff;
             margin-bottom: 6px;
         }
 
@@ -554,9 +553,9 @@
 <div class="container">
     <header>
         <h1>Normal & ORM Map Generator</h1>
-        <p class="subtitle">Generate clean PBR maps with Proportional Shape Edge Masking, Mask Strength & Outside Opacity Control</p>
-        <div style="margin-top: 6px; display: inline-flex; align-items: center; gap: 8px; font-size: 12px; background: rgba(0, 164, 255, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 9999px; padding: 4px 12px; font-weight: 500;">
-            <span>🥥 Optimized for <strong>Cocos Creator</strong> (Cocos 3D) &amp; PBR Game Engines</span>
+        <p class="subtitle">Client-side PBR texture generator with proportional edge masking, ORM channel packing, and real-time 3D preview</p>
+        <div style="margin-top: 6px; display: inline-flex; align-items: center; gap: 8px; font-size: 12px; background: rgba(59, 130, 246, 0.12); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 6px; padding: 4px 12px; font-weight: 500;">
+            <span>Optimized for <strong>Cocos Creator</strong> (Cocos 3D) &amp; PBR Game Engines</span>
         </div>
         <div style="margin-top: 8px; font-size: 13px; color: var(--text-muted);">Created by <strong style="color: var(--accent);">Ashwath Jain</strong></div>
     </header>
@@ -595,9 +594,18 @@
                 <span class="slider-val" id="shapeTypeVal">Auto Island</span>
             </div>
             <div class="segmented-btn-group" id="shapeTypeGroup">
-                <button class="seg-btn active" data-shape="auto">✨ Auto</button>
-                <button class="seg-btn" data-shape="cube">🔲 Cube/Box</button>
-                <button class="seg-btn" data-shape="circle">🔘 Circle/Cyl</button>
+                <button class="seg-btn active" data-shape="auto">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    Auto
+                </button>
+                <button class="seg-btn" data-shape="cube">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>
+                    Cube/Box
+                </button>
+                <button class="seg-btn" data-shape="circle">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>
+                    Circle/Cyl
+                </button>
             </div>
         </div>
 
@@ -650,7 +658,7 @@
         <div class="btn-group">
             <div style="display: flex; align-items: center; gap: 14px;">
                 <label style="font-size: 13px; color: #93c5fd; display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600;">
-                    <input type="checkbox" id="showMaskOverlayCheck"> 👁️ Show Edge Mask Gradient
+                    <input type="checkbox" id="showMaskOverlayCheck"> Show Edge Mask Overlay
                 </label>
             </div>
             <button class="btn btn-success" id="downloadAllBtn" disabled>
@@ -732,8 +740,15 @@
             </div>
         </div>
     </div>
-    <footer style="text-align: center; margin-top: 12px; padding: 18px 0; color: var(--text-muted); font-size: 13px; border-top: 1px solid var(--border);">
+    <footer style="text-align: center; margin-top: 12px; padding: 18px 0; color: var(--text-muted); font-size: 13px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; align-items: center;">
         <p><strong>PBR Normal &amp; ORM Map Generator</strong> &bull; Created by <a href="https://github.com/ashwathjain" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: none; font-weight: 600;">Ashwath Jain</a></p>
+        <div style="display: flex; gap: 16px; font-size: 12px;">
+            <a href="privacy.html" style="color: var(--text-muted); text-decoration: none;">Privacy Policy</a>
+            <span style="color: var(--border);">&bull;</span>
+            <a href="terms.html" style="color: var(--text-muted); text-decoration: none;">Terms &amp; Conditions</a>
+            <span style="color: var(--border);">&bull;</span>
+            <a href="https://github.com/ashwathjain/PBR-Texture-Tools" target="_blank" rel="noopener noreferrer" style="color: var(--text-muted); text-decoration: none;">GitHub</a>
+        </div>
     </footer>
 </div>
 
@@ -767,13 +782,13 @@
                     <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
-                    🧹 Erase Normal
+                    Erase Normal
                 </button>
                 <button class="seg-btn" id="editorToolRestore" title="Restore original normal details">
                     <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                    ↩️ Restore Normal
+                    Restore Normal
                 </button>
             </div>
         </div>
@@ -809,8 +824,11 @@
         </div>
 
         <div class="tool-group" style="margin-left: auto;">
-            <button class="btn btn-secondary" id="modalResetBtn" style="padding: 6px 12px; font-size: 12px;" title="Reset all erased normals">
-                🔄 Reset All Erasures
+            <button class="btn btn-secondary" id="modalResetBtn" style="padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;" title="Reset all erased normals">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Reset All Erasures
             </button>
         </div>
     </div>

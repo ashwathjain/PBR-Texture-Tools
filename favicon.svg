@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" rx="6" fill="#111827"/>
+  <rect x="1" y="1" width="30" height="30" rx="5" fill="none" stroke="#1f2937" stroke-width="1"/>
+  <!-- Tangent-space Normal vector icon: Isometric cube surfaces -->
+  <!-- Top surface (Z-axis dominant / Light Blue) -->
+  <polygon points="16,6 25,11 16,16 7,11" fill="#60a5fa"/>
+  <!-- Left surface (X-axis dominant / Red-violet) -->
+  <polygon points="7,11 16,16 16,26 7,21" fill="#3b82f6"/>
+  <!-- Right surface (Y-axis dominant / Green-cyan) -->
+  <polygon points="16,16 25,11 25,21 16,26" fill="#2563eb"/>
+  <!-- Subtle center node -->
+  <circle cx="16" cy="16" r="1.5" fill="#ffffff" opacity="0.9"/>
+</svg>

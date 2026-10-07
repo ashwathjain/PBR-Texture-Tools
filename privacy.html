@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Ashwath Jain">
+    <meta name="description" content="Privacy Policy for PBR Texture Tool. Learn about our client-side processing, zero data collection, and local browser execution.">
+    <title>Privacy Policy - PBR Texture Tool</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <style>
+        :root {
+            --bg-primary: #12141a;
+            --bg-secondary: #1a1d26;
+            --bg-card: #222634;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border: #2e3446;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .btn-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-link:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .content-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+        }
+
+        .last-updated {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: -16px;
+        }
+
+        h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-top: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        p, ul {
+            font-size: 14px;
+            color: #d1d5db;
+        }
+
+        ul {
+            padding-left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .highlight-box {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 14px;
+            color: #bfdbfe;
+        }
+
+        footer {
+            text-align: center;
+            padding: 24px 0 12px;
+            color: var(--text-muted);
+            font-size: 13px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 16px;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="brand-title">PBR Texture Tool</div>
+        <a href="index.html" class="btn-link">Back to Generator</a>
+    </header>
+
+    <main class="content-card">
+        <h1>Privacy Policy</h1>
+        <div class="last-updated">Effective Date: October 2026</div>
+
+        <div class="highlight-box">
+            <strong>Core Privacy Guarantee:</strong> PBR Texture Tool runs entirely in your web browser. Your images and textures are processed 100% locally on your machine and are never transmitted, uploaded, or stored on any external server.
+        </div>
+
+        <section>
+            <h2>1. Image Processing &amp; Data Security</h2>
+            <p>All calculations, including normal map height analysis, Sobel filtering, blur kernels, and packed ORM channel generation (Ambient Occlusion, Roughness, Metallic), execute within client-side HTML5 Canvas and WebGL contexts. Your source images and exported maps never leave your device.</p>
+        </section>
+
+        <section>
+            <h2>2. Information Collection</h2>
+            <p>We do not collect, store, or transmit any personally identifiable information (PII). Specifically:</p>
+            <ul>
+                <li>No account registration or personal credentials are required.</li>
+                <li>No user files, textures, or geometry data are uploaded to any server.</li>
+                <li>No user telemetry, tracking pixels, or diagnostic logs are harvested.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>3. Cookies and Local Storage</h2>
+            <p>PBR Texture Tool does not use advertising cookies, profiling cookies, or tracking beacons. If any settings or preferences are saved in the future, they will remain strictly within your local browser storage (LocalStorage / SessionStorage) and are never shared with third parties.</p>
+        </section>
+
+        <section>
+            <h2>4. Third-Party Dependencies</h2>
+            <p>The 3D material preview viewport loads open-source rendering libraries (Three.js and OrbitControls) from standard public CDNs (cdnjs and jsdelivr). These CDN requests are subject to the respective CDN providers standard network delivery policies, which do not receive your canvas texture data.</p>
+        </section>
+
+        <section>
+            <h2>5. Open Source Transparency</h2>
+            <p>This software is completely open source under the MIT License. The entire source code is auditable by anyone in the public GitHub repository at <a href="https://github.com/ashwathjain/PBR-Texture-Tools" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: none;">github.com/ashwathjain/PBR-Texture-Tools</a>.</p>
+        </section>
+
+        <section>
+            <h2>6. Contact</h2>
+            <p>If you have any questions or feedback regarding this Privacy Policy, please open an issue on the GitHub repository or reach out via email at <a href="mailto:jainashwath10@gmail.com" style="color: var(--accent); text-decoration: none;">jainashwath10@gmail.com</a>.</p>
+        </section>
+    </main>
+
+    <footer>
+        <div>PBR Texture Tool &bull; Created by Ashwath Jain</div>
+        <div class="footer-links">
+            <a href="index.html">Generator</a>
+            <a href="terms.html">Terms &amp; Conditions</a>
+            <a href="https://github.com/ashwathjain/PBR-Texture-Tools" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </div>
+    </footer>
+</div>
+
+</body>
+</html>
