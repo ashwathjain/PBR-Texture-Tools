@@ -8,7 +8,7 @@
 [![Three.js](https://img.shields.io/badge/3D%20Preview-Three.js-black.svg)](https://threejs.org/)
 
 > **A fast, standalone, in-browser texture generator built for Cocos Creator and 3D game developers.**  
-> Effortlessly generate high-quality **Normal Maps** and packed **ORM (Ambient Occlusion, Roughness, Metallic) Maps** directly compatible with **Cocos Creator 3.x PBR materials** (as well as Unity, Unreal Engine, Godot, and Blender) in real time with zero installation, zero server dependencies, and live 3D preview.
+> Generate production-ready **Normal Maps** and packed **ORM (Ambient Occlusion, Roughness, Metallic) Maps** directly compatible with **Cocos Creator 3.x PBR materials** (as well as Unity, Unreal Engine, Godot, and Blender) in real time with zero installation, zero server dependencies, and live 3D preview.
 
 ---
 
