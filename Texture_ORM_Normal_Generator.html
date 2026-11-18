@@ -5,30 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Ashwath Jain">
     <meta name="description" content="Standalone PBR Normal and ORM Map Generator with live 3D preview, edge masking, and canvas editor. Created by Ashwath Jain.">
-    <title>PBR Texture Tool - Normal & ORM Generator</title>
+    <title>PBR Texture Tool - Normal &amp; ORM Generator | Tech Art Workbench</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <!-- Editorial & Monospace Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #12141a;
-            --bg-secondary: #1a1d26;
-            --bg-card: #222634;
-            --accent: #3b82f6;
-            --accent-hover: #2563eb;
-            --accent-glow: rgba(59, 130, 246, 0.4);
-            --text-main: #f3f4f6;
-            --text-muted: #9ca3af;
-            --border: #2e3446;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --modal-bg: rgba(10, 12, 18, 0.94);
+            /* Warm Charcoal Atelier Palette */
+            --bg-primary: #0e0e0c;
+            --bg-secondary: #141411;
+            --bg-card: #181714;
+            --bg-card-hover: #1f1e1a;
+            --bg-input: #10100d;
+            --accent: #d97036;
+            --accent-hover: #e08953;
+            --accent-glow: rgba(217, 112, 54, 0.25);
+            --accent-subtle: rgba(217, 112, 54, 0.12);
+            --accent-olive: #7e8c6c;
+            --accent-olive-subtle: rgba(126, 140, 108, 0.14);
+            --text-main: #f4efe6;
+            --text-muted: #c8c3b6;
+            --text-dim: #7d796e;
+            --border: #252420;
+            --border-medium: #33312b;
+            --border-accent: rgba(217, 112, 54, 0.45);
+            --bone: #ede7d8;
+            --bone-hover: #dfd7c4;
+            --success: #7e8c6c;
+            --danger: #cf5648;
+            --warning: #d99b36;
+            --modal-bg: rgba(14, 14, 12, 0.96);
+            --radius-xs: 2px;
+            --radius-sm: 2px;
+            --radius-md: 3px;
+            --radius-lg: 4px;
+            --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: var(--font-family);
         }
 
         body {
@@ -39,6 +60,47 @@
             flex-direction: column;
             align-items: center;
             padding: 24px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Subtle 32px Technical Drafting Grid */
+        .workbench-grid {
+            background-image: 
+                linear-gradient(to right, rgba(230, 225, 210, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(230, 225, 210, 0.02) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+
+        /* Registration Corner Ticks */
+        .corner-ticks {
+            position: relative;
+        }
+        .corner-ticks::before,
+        .corner-ticks::after {
+            content: "";
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            pointer-events: none;
+            opacity: 0.28;
+            transition: opacity 0.2s ease;
+        }
+        .corner-ticks::before {
+            top: 3px;
+            left: 3px;
+            border-top: 1px solid var(--text-muted);
+            border-left: 1px solid var(--text-muted);
+        }
+        .corner-ticks::after {
+            bottom: 3px;
+            right: 3px;
+            border-bottom: 1px solid var(--text-muted);
+            border-right: 1px solid var(--text-muted);
+        }
+        .corner-ticks:hover::before,
+        .corner-ticks:hover::after {
+            opacity: 0.75;
         }
 
         .container {
@@ -54,11 +116,21 @@
             padding: 10px 0;
         }
 
+        .header-kicker {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
         h1 {
             font-size: 26px;
-            font-weight: 700;
+            font-weight: 800;
             letter-spacing: -0.5px;
-            color: #ffffff;
+            color: var(--text-main);
             margin-bottom: 6px;
         }
 
@@ -70,20 +142,19 @@
         /* Drop Zone */
         .drop-zone {
             background-color: var(--bg-secondary);
-            border: 2px dashed var(--border);
-            border-radius: 16px;
-            padding: 36px 20px;
+            border: 1px dashed var(--border-medium);
+            border-radius: var(--radius-md);
+            padding: 32px 20px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.25s ease;
+            transition: all 0.2s ease;
             position: relative;
             overflow: hidden;
         }
 
         .drop-zone:hover, .drop-zone.dragover {
             border-color: var(--accent);
-            background-color: rgba(59, 130, 246, 0.05);
-            box-shadow: 0 0 20px var(--accent-glow);
+            background-color: var(--accent-subtle);
         }
 
         .drop-zone input[type="file"] {
@@ -91,34 +162,48 @@
         }
 
         .drop-icon {
-            width: 44px;
-            height: 44px;
+            width: 40px;
+            height: 40px;
             margin: 0 auto 10px;
             stroke: var(--accent);
         }
 
         .drop-text {
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 15px;
+            font-weight: 700;
             color: var(--text-main);
             margin-bottom: 4px;
         }
 
         .drop-subtext {
-            font-size: 13px;
-            color: var(--text-muted);
+            font-size: 12px;
+            font-family: var(--font-mono);
+            color: var(--text-dim);
         }
 
         /* Controls */
         .controls-card {
             background-color: var(--bg-secondary);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 18px 24px;
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px 20px;
             align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        @media (max-width: 1080px) {
+            .controls-card {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .controls-card {
+                grid-template-columns: 1fr;
+            }
         }
 
         .slider-group {
@@ -130,49 +215,68 @@
         .slider-header {
             display: flex;
             justify-content: space-between;
-            font-size: 13px;
+            align-items: baseline;
+            gap: 6px;
+            font-family: var(--font-mono);
+            font-size: 11px;
             font-weight: 600;
+            color: var(--text-muted);
+            min-width: 0;
+        }
+
+        .slider-header span:first-child {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0;
         }
 
         .slider-val {
             color: var(--accent);
-            font-family: monospace;
-            font-size: 13px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         input[type="range"] {
             -webkit-appearance: none;
+            appearance: none;
             width: 100%;
-            height: 6px;
-            background: var(--bg-card);
-            border-radius: 3px;
+            height: 4px;
+            background: #24231e;
+            border-radius: 2px;
             outline: none;
         }
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            border-radius: var(--radius-xs);
             background: var(--accent);
+            border: 1px solid #141411;
             cursor: pointer;
-            box-shadow: 0 0 10px var(--accent-glow);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
             transition: transform 0.1s;
         }
 
         input[type="range"]::-webkit-slider-thumb:hover {
             transform: scale(1.15);
+            background: var(--accent-hover);
         }
 
         .custom-select {
             width: 100%;
-            background: var(--bg-card);
+            background: var(--bg-input);
             color: var(--text-main);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 8px 12px;
-            font-size: 13px;
+            border-radius: var(--radius-xs);
+            padding: 7px 10px;
+            font-family: var(--font-mono);
+            font-size: 12px;
             font-weight: 600;
             outline: none;
             cursor: pointer;
@@ -195,125 +299,203 @@
 
         .btn {
             background-color: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 10px 18px;
-            font-size: 13px;
-            font-weight: 600;
+            color: #ede7d8;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius-xs);
+            padding: 8px 14px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            transition: all 0.2s ease;
+            gap: 7px;
+            transition: all 0.15s ease;
             text-decoration: none;
         }
 
         .btn:hover {
             background-color: var(--accent-hover);
+            color: #ffffff;
             transform: translateY(-1px);
         }
 
-        .btn:disabled {
-            background-color: var(--border);
-            color: var(--text-muted);
-            cursor: not-allowed;
-            transform: none;
+        .btn:active {
+            transform: translateY(1px);
         }
 
-        .btn-success { background-color: var(--success); }
-        .btn-success:hover { background-color: #059669; }
+        .btn:disabled {
+            background-color: var(--bg-card) !important;
+            border: 1px solid var(--border) !important;
+            color: var(--text-dim) !important;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none !important;
+        }
+
+        /* Primary Download Both Maps Bone Button */
+        .btn-success {
+            background-color: var(--bone);
+            border: 1px solid #c9c0ac;
+            color: #141310 !important;
+            font-weight: 700;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+        }
+        .btn-success:hover {
+            background-color: var(--bone-hover);
+            color: #0c0c0a !important;
+        }
+
         .btn-warning { background-color: var(--warning); color: #111827; }
         .btn-warning:hover { background-color: #d97706; }
-        .btn-secondary { background-color: var(--bg-card); border: 1px solid var(--border); color: var(--text-main); }
-        .btn-secondary:hover { background-color: #2a3042; }
-        .btn-primary { background-color: var(--accent); }
+        
+        .btn-secondary {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-medium);
+            color: var(--text-muted);
+        }
+        .btn-secondary:hover {
+            background-color: var(--bg-card-hover);
+            border-color: var(--accent);
+            color: var(--text-main);
+        }
+        .btn-primary { background-color: var(--accent); color: #0e0e0c; }
 
         /* Shape Toggle Switcher */
         .shape-switcher {
             display: flex;
-            background: var(--bg-primary);
-            border-radius: 8px;
+            background: var(--bg-input);
+            border-radius: var(--radius-xs);
             padding: 2px;
             gap: 2px;
             border: 1px solid var(--border);
+            flex-shrink: 0;
         }
 
         .shape-btn {
             background: transparent;
             border: none;
-            color: var(--text-muted);
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 12px;
+            color: var(--text-dim);
+            padding: 3px 6px;
+            border-radius: var(--radius-xs);
+            font-family: var(--font-mono);
+            font-size: 10px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.15s ease;
+            white-space: nowrap;
         }
 
         .shape-btn.active {
-            background: var(--accent);
-            color: #ffffff;
-            box-shadow: 0 2px 6px rgba(59, 130, 246, 0.4);
+            background: #1e1d19;
+            color: var(--text-main);
+            border: 1px solid var(--border-medium);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
         .shape-btn:hover:not(.active) {
             color: var(--text-main);
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.03);
         }
 
         /* Grid */
         .preview-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
         }
 
         .card {
             background-color: var(--bg-secondary);
             border: 1px solid var(--border);
-            border-radius: 16px;
+            border-radius: var(--radius-md);
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+            transition: border-color 0.2s ease;
+            min-width: 0;
+        }
+
+        .card:hover {
+            border-color: var(--border-medium);
         }
 
         .card-header {
-            padding: 14px 18px;
+            padding: 8px 12px;
             background-color: var(--bg-card);
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border);
+            gap: 6px;
+            min-height: 38px;
+            box-sizing: border-box;
         }
 
         .card-title {
-            font-size: 14px;
-            font-weight: 600;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-main);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0;
         }
 
         .badge {
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-weight: 700;
+            font-family: var(--font-mono);
+            font-size: 9.5px;
+            padding: 2px 6px;
+            border-radius: var(--radius-xs);
+            font-weight: 600;
             text-transform: uppercase;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
-        .badge-norm { background: #6366f1; color: #fff; }
-        .badge-orm { background: #10b981; color: #fff; }
-        .badge-orig { background: #6b7280; color: #fff; }
-        .badge-3d { background: #ec4899; color: #fff; }
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: var(--radius-xs);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .badge-norm {
+            background: var(--accent-subtle);
+            color: var(--accent);
+            border: 1px solid var(--border-accent);
+        }
+        .badge-orm {
+            background: var(--accent-olive-subtle);
+            color: var(--accent-olive);
+            border: 1px solid rgba(126, 140, 108, 0.35);
+        }
+        .badge-orig {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+        }
+        .badge-3d {
+            background: var(--accent-subtle);
+            color: var(--accent);
+            border: 1px solid var(--border-accent);
+        }
 
         .card-body {
             position: relative;
-            padding: 16px;
+            padding: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #0f1117;
+            background: #090908;
             min-height: 280px;
             user-select: none;
         }
@@ -321,36 +503,43 @@
         .card-body canvas, .card-body img {
             max-width: 100%;
             max-height: 280px;
-            border-radius: 8px;
+            border-radius: var(--radius-xs);
             object-fit: contain;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
         }
 
         .card-footer {
-            padding: 12px 16px;
+            padding: 8px 12px;
             background-color: var(--bg-card);
             border-top: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            min-height: 42px;
+            box-sizing: border-box;
         }
 
         .info-text {
-            font-size: 12px;
-            color: var(--text-muted);
-            font-family: monospace;
+            font-size: 11px;
+            color: var(--text-dim);
+            font-family: var(--font-mono);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         /* 3D Viewport */
         #viewport-3d {
             width: 100%;
             height: 280px;
-            border-radius: 8px;
+            border-radius: var(--radius-xs);
+            background: #090908;
         }
 
         /* ------------------------------------------------------------- */
-        /* Fullscreen / Pop-up Normal Canvas Editor Modal               */
+        /* Fullscreen Normal Map & ORM Canvas Editor Modals              */
         /* ------------------------------------------------------------- */
         .modal-overlay {
             position: fixed;
@@ -359,7 +548,7 @@
             width: 100vw;
             height: 100vh;
             background: var(--modal-bg);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(8px);
             z-index: 9999;
             display: none;
             flex-direction: column;
@@ -376,20 +565,26 @@
             align-items: center;
             justify-content: space-between;
             background: var(--bg-card);
-            padding: 12px 20px;
-            border-radius: 12px;
+            padding: 10px 18px;
+            border-radius: var(--radius-md);
             border: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .modal-title-group {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         .modal-title {
-            font-size: 16px;
+            font-family: var(--font-mono);
+            font-size: 13px;
             font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
             color: var(--text-main);
         }
 
@@ -397,10 +592,10 @@
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
             background: var(--bg-secondary);
-            padding: 10px 18px;
-            border-radius: 12px;
+            padding: 9px 16px;
+            border-radius: var(--radius-md);
             border: 1px solid var(--border);
         }
 
@@ -408,47 +603,57 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-wrap: wrap;
         }
 
         .tool-label {
-            font-size: 12px;
+            font-family: var(--font-mono);
+            font-size: 11px;
             font-weight: 600;
-            color: var(--text-muted);
+            color: var(--text-dim);
         }
 
         .segmented-btn-group {
             display: flex;
-            background: var(--bg-primary);
-            border-radius: 8px;
-            padding: 3px;
-            gap: 3px;
+            width: 100%;
+            background: var(--bg-input);
+            border-radius: var(--radius-xs);
+            padding: 2px;
+            gap: 2px;
             border: 1px solid var(--border);
+            box-sizing: border-box;
         }
 
         .seg-btn {
+            flex: 1 1 0;
+            min-width: 0;
             background: transparent;
             border: none;
-            color: var(--text-muted);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
+            color: var(--text-dim);
+            padding: 4px 6px;
+            border-radius: var(--radius-xs);
+            font-family: var(--font-mono);
+            font-size: 11px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.15s ease;
             display: flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            gap: 4px;
+            white-space: nowrap;
         }
 
         .seg-btn.active {
-            background: var(--accent);
-            color: #ffffff;
-            box-shadow: 0 2px 6px rgba(59, 130, 246, 0.4);
+            background: #1e1d19;
+            color: var(--text-main);
+            border: 1px solid var(--border-medium);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
         .seg-btn:hover:not(.active) {
             color: var(--text-main);
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.03);
         }
 
         .mini-slider {
@@ -459,7 +664,8 @@
         }
 
         .mini-slider span {
-            font-size: 12px;
+            font-family: var(--font-mono);
+            font-size: 11px;
             font-weight: 600;
             white-space: nowrap;
         }
@@ -467,9 +673,9 @@
         /* Viewport for pan & zoom */
         .editor-viewport {
             flex: 1;
-            background: #090a0f;
+            background: #090908;
             border: 1px solid var(--border);
-            border-radius: 14px;
+            border-radius: var(--radius-md);
             position: relative;
             overflow: hidden;
             display: flex;
@@ -498,9 +704,9 @@
         }
 
         #editorCanvas {
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), 0 0 0 1px var(--border);
             image-rendering: auto;
-            border-radius: 4px;
+            border-radius: var(--radius-xs);
             background: #8080ff;
         }
 
@@ -512,7 +718,7 @@
             border-radius: 50%;
             transform: translate(-50%, -50%);
             display: none;
-            box-shadow: 0 0 8px rgba(0, 0, 0, 0.8), inset 0 0 6px rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.8), inset 0 0 6px var(--accent-glow);
             z-index: 100;
         }
 
@@ -521,17 +727,115 @@
             justify-content: space-between;
             align-items: center;
             padding: 4px 8px;
-            font-size: 12px;
-            color: var(--text-muted);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-dim);
         }
 
         .hotkey-tag {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            padding: 2px 6px;
-            border-radius: 4px;
-            color: #93c5fd;
-            font-family: monospace;
+            padding: 2px 5px;
+            border-radius: var(--radius-xs);
+            color: var(--accent);
+            font-family: var(--font-mono);
+        }
+
+        /* ------------------------------------------------------------- */
+        /* Customize ORM Modal Specific Styles                          */
+        /* ------------------------------------------------------------- */
+        .orm-modal-container {
+            width: 95%;
+            max-width: 960px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 18px 22px;
+            margin: auto;
+            max-height: 92vh;
+            overflow-y: auto;
+        }
+
+        .orm-preview-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .channel-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            gap: 8px;
+        }
+
+        .channel-card.highlight-channel {
+            border-color: var(--border-accent);
+            background: #1a1713;
+        }
+
+        .channel-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .channel-card canvas {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: contain;
+            background: #090908;
+            border-radius: var(--radius-xs);
+            border: 1px solid var(--border);
+        }
+
+        .orm-controls-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+
+        .orm-control-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .custom-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .custom-checkbox input {
+            cursor: pointer;
+            accent-color: var(--accent);
+            width: 13px;
+            height: 13px;
+            border-radius: 2px;
         }
 
         /* Responsive */
@@ -542,31 +846,48 @@
             .btn-group {
                 flex-direction: column;
             }
+            .orm-preview-strip {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .orm-controls-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
     <!-- Three.js for live 3D material preview -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        if (typeof THREE === 'undefined') {
+            document.write('<script src="libs/three.min.js"><\/script>');
+            document.write('<script src="libs/OrbitControls.js"><\/script>');
+        }
+    </script>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>Normal & ORM Map Generator</h1>
-        <p class="subtitle">Client-side PBR texture generator with proportional edge masking, ORM channel packing, and real-time 3D preview</p>
-        <div style="margin-top: 6px; display: inline-flex; align-items: center; gap: 8px; font-size: 12px; background: rgba(59, 130, 246, 0.12); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 6px; padding: 4px 12px; font-weight: 500;">
-            <span>Optimized for <strong>Cocos Creator</strong> (Cocos 3D) &amp; PBR Game Engines</span>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px;">
+            <span style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); background: #1a1713; border: 1px solid var(--border-accent); padding: 2px 8px; border-radius: 2px;">WORKBENCH v2.4</span>
+            <span style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--text-dim);">[ PBR TECHNICAL ARTIST TOOLKIT ]</span>
         </div>
-        <div style="margin-top: 8px; font-size: 13px; color: var(--text-muted);">Created by <strong style="color: var(--accent);">Ashwath Jain</strong></div>
+        <h1>Normal &amp; ORM Map Generator</h1>
+        <p class="subtitle">Client-side PBR texture generator with proportional edge masking, ORM channel packing, and real-time 3D preview</p>
+        <div style="margin-top: 6px; display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-family: var(--font-mono); background: #161513; color: var(--text-secondary); border: 1px solid var(--border); border-radius: var(--radius-xs); padding: 4px 12px;">
+            <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent);"></span>
+            <span>Optimized for <strong style="color: var(--text-main);">Cocos Creator</strong> (Cocos 3D), Unreal &amp; glTF 2.0 Engines</span>
+        </div>
+        <div style="margin-top: 8px; font-size: 12px; font-family: var(--font-mono); color: var(--text-muted);">Crafted by <strong style="color: var(--accent);">Ashwath Jain</strong></div>
     </header>
 
     <!-- Drag and drop zone -->
     <div class="drop-zone" id="dropZone">
         <svg class="drop-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
         </svg>
-        <div class="drop-text">Drag & Drop Your Texture Image Here</div>
-        <div class="drop-subtext">Supports PNG, JPG, JPEG, WebP, etc. (Or click to browse)</div>
+        <div class="drop-text">DROP SOURCE TEXTURE HERE</div>
+        <div class="drop-subtext">Supports PNG, JPG, JPEG, WebP &bull; 100% Client-Side Processing &bull; No Uploads</div>
         <input type="file" id="fileInput" accept="image/*">
     </div>
 
@@ -591,20 +912,20 @@
         <div class="slider-group">
             <div class="slider-header">
                 <span>Shape Mode</span>
-                <span class="slider-val" id="shapeTypeVal">Auto Island</span>
+                <span class="slider-val" id="shapeTypeVal">Auto</span>
             </div>
             <div class="segmented-btn-group" id="shapeTypeGroup">
-                <button class="seg-btn active" data-shape="auto">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                <button class="seg-btn active" data-shape="auto" title="Auto Island detection">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     Auto
                 </button>
-                <button class="seg-btn" data-shape="cube">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>
-                    Cube/Box
+                <button class="seg-btn" data-shape="cube" title="Cube / Box bounding mask">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>
+                    Box
                 </button>
-                <button class="seg-btn" data-shape="circle">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>
-                    Circle/Cyl
+                <button class="seg-btn" data-shape="circle" title="Circle / Cylinder radial mask">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>
+                    Circle
                 </button>
             </div>
         </div>
@@ -657,8 +978,8 @@
 
         <div class="btn-group">
             <div style="display: flex; align-items: center; gap: 14px;">
-                <label style="font-size: 13px; color: #93c5fd; display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600;">
-                    <input type="checkbox" id="showMaskOverlayCheck"> Show Edge Mask Overlay
+                <label style="font-size: 11px; font-family: var(--font-mono); color: var(--text-secondary); display: flex; align-items: center; gap: 7px; cursor: pointer; font-weight: 500;">
+                    <input type="checkbox" id="showMaskOverlayCheck" style="accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer;"> Show Edge Mask Overlay
                 </label>
             </div>
             <button class="btn btn-success" id="downloadAllBtn" disabled>
@@ -696,39 +1017,44 @@
                 <canvas id="normalCanvas"></canvas>
             </div>
             <div class="card-footer">
-                <button class="btn btn-secondary" id="openEditorBtn" style="padding: 6px 12px; font-size: 12px;" disabled title="Open full-screen Normal canvas to zoom, pan, and manually erase normals">
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <button class="btn btn-secondary" id="openEditorBtn" style="padding: 5px 10px; font-size: 11px; white-space: nowrap;" disabled title="Open full-screen Normal canvas to zoom, pan, and manually erase normals">
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                     </svg>
-                    Erase Normals in Editor
+                    Edit Normals
                 </button>
-                <button class="btn" id="downloadNormalBtn" style="padding: 6px 12px; font-size: 12px;" disabled>Download</button>
+                <button class="btn" id="downloadNormalBtn" style="padding: 5px 10px; font-size: 11px; white-space: nowrap;" disabled>Download</button>
             </div>
         </div>
 
         <!-- ORM Map -->
         <div class="card">
             <div class="card-header">
-                <span class="card-title">ORM Map (AO, Rough, Metal)</span>
-                <span class="badge badge-orm">R:AO | G:Rough | B:Metal</span>
+                <span class="card-title">ORM Map</span>
+                <span class="badge badge-orm">AO · Rough · Metal</span>
             </div>
             <div class="card-body">
                 <canvas id="ormCanvas"></canvas>
             </div>
             <div class="card-footer">
-                <span class="info-text" id="ormInfo">Packed PBR</span>
-                <button class="btn" id="downloadOrmBtn" style="padding: 6px 12px; font-size: 12px;" disabled>Download</button>
+                <button class="btn btn-secondary" id="customizeOrmBtn" style="padding: 5px 10px; font-size: 11px; white-space: nowrap;" disabled title="Customize ORM Channel Packing (AO, Roughness, Metallic)">
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+                    </svg>
+                    Customize ORM
+                </button>
+                <button class="btn" id="downloadOrmBtn" style="padding: 5px 10px; font-size: 11px; white-space: nowrap;" disabled>Download</button>
             </div>
         </div>
 
         <!-- 3D Live Preview -->
         <div class="card">
             <div class="card-header">
-                <span class="card-title">3D Live Preview</span>
+                <span class="card-title">3D Preview</span>
                 <div class="shape-switcher">
                     <button class="shape-btn" data-shape="sphere">Sphere</button>
                     <button class="shape-btn active" data-shape="cube">Cube</button>
-                    <button class="shape-btn" data-shape="cylinder">Cylinder</button>
+                    <button class="shape-btn" data-shape="cylinder">Cyl</button>
                     <button class="shape-btn" data-shape="plane">Plane</button>
                 </div>
             </div>
@@ -847,6 +1173,145 @@
     </div>
 </div>
 
+<!-- ------------------------------------------------------------- -->
+<!-- Customize ORM Channel Packing Modal                           -->
+<!-- ------------------------------------------------------------- -->
+<div class="modal-overlay" id="ormModal">
+    <div class="orm-modal-container">
+        <div class="modal-header">
+            <div class="modal-title-group">
+                <span class="modal-title">Customize ORM Channel Packing</span>
+                <span class="badge badge-orm">R: AO · G: Roughness · B: Metallic</span>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button class="btn btn-secondary" id="ormResetBtn" style="padding: 6px 12px; font-size: 12px;">Reset Defaults</button>
+                <button class="btn btn-success" id="ormApplyBtn" style="padding: 6px 16px; font-size: 13px;">Apply &amp; Close</button>
+            </div>
+        </div>
+
+        <div class="orm-modal-body" style="display: flex; flex-direction: column; gap: 14px;">
+            <!-- 4-Way Live Channel Strip -->
+            <div class="orm-preview-strip">
+                <div class="channel-card">
+                    <div class="channel-header">
+                        <span style="color: #ef4444; font-weight: 700;">[ RED CHANNEL ]</span>
+                        <span>Ambient Occlusion (AO)</span>
+                    </div>
+                    <canvas id="previewAoCanvas" width="180" height="180"></canvas>
+                </div>
+                <div class="channel-card">
+                    <div class="channel-header">
+                        <span style="color: #22c55e; font-weight: 700;">[ GREEN CHANNEL ]</span>
+                        <span>Roughness Map</span>
+                    </div>
+                    <canvas id="previewRoughCanvas" width="180" height="180"></canvas>
+                </div>
+                <div class="channel-card">
+                    <div class="channel-header">
+                        <span style="color: #3b82f6; font-weight: 700;">[ BLUE CHANNEL ]</span>
+                        <span>Metallic Map</span>
+                    </div>
+                    <canvas id="previewMetalCanvas" width="180" height="180"></canvas>
+                </div>
+                <div class="channel-card highlight-channel">
+                    <div class="channel-header">
+                        <span style="color: var(--accent); font-weight: 700;">[ COMPOSITE RGB ]</span>
+                        <span>Packed ORM Result</span>
+                    </div>
+                    <canvas id="previewCompositeOrmCanvas" width="180" height="180"></canvas>
+                </div>
+            </div>
+
+            <!-- Controls Grid: AO, Roughness, Metallic -->
+            <div class="orm-controls-grid">
+                <!-- AO Box -->
+                <div class="orm-control-box">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                        <span style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: #ef4444; letter-spacing: 0.05em;">[R] AMBIENT OCCLUSION</span>
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>Cavity Multiplier</span>
+                            <span class="slider-val" id="ormAoIntVal">2.0x</span>
+                        </div>
+                        <input type="range" id="ormAoIntSlider" min="0.0" max="5.0" step="0.1" value="2.0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>Baseline Ambient Floor</span>
+                            <span class="slider-val" id="ormAoFloorVal">0.75</span>
+                        </div>
+                        <input type="range" id="ormAoFloorSlider" min="0.1" max="1.0" step="0.05" value="0.75">
+                    </div>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" id="ormAoInvertCheck">
+                        <span>Invert AO Channel (1.0 - AO)</span>
+                    </label>
+                </div>
+
+                <!-- Roughness Box -->
+                <div class="orm-control-box">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                        <span style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: #22c55e; letter-spacing: 0.05em;">[G] ROUGHNESS MAP</span>
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>Base Surface Roughness</span>
+                            <span class="slider-val" id="ormRoughBaseVal">0.70</span>
+                        </div>
+                        <input type="range" id="ormRoughBaseSlider" min="0.0" max="1.5" step="0.05" value="0.70">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>Detail Gradient Multiplier</span>
+                            <span class="slider-val" id="ormRoughDetailVal">0.60x</span>
+                        </div>
+                        <input type="range" id="ormRoughDetailSlider" min="0.0" max="2.0" step="0.05" value="0.60">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>Minimum Roughness Floor</span>
+                            <span class="slider-val" id="ormRoughFloorVal">0.20</span>
+                        </div>
+                        <input type="range" id="ormRoughFloorSlider" min="0.0" max="0.9" step="0.05" value="0.20">
+                    </div>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" id="ormRoughInvertCheck">
+                        <span>Invert to Smoothness / Gloss</span>
+                    </label>
+                </div>
+
+                <!-- Metallic Box -->
+                <div class="orm-control-box">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                        <span style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: #3b82f6; letter-spacing: 0.05em;">[B] METALLIC MAP</span>
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>Global Metallic Value</span>
+                            <span class="slider-val" id="ormMetalAmountVal">0.00</span>
+                        </div>
+                        <input type="range" id="ormMetalAmountSlider" min="0.0" max="1.0" step="0.05" value="0.0">
+                    </div>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" id="ormMetalCavityCheck">
+                        <span>Mask Cavities (Dielectric Recesses)</span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" id="ormMetalInvertCheck">
+                        <span>Invert Metallic Channel</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <span><strong>Channel Standard:</strong> Red = AO | Green = Roughness | Blue = Metallic (glTF 2.0 / Cocos Creator / Unreal Engine)</span>
+            <span style="color: var(--accent); font-family: var(--font-mono); font-size: 11px;">Live Sync</span>
+        </div>
+    </div>
+</div>
+
 <script>
     // State
     let loadedImage = null;
@@ -860,6 +1325,20 @@
     let blurredHeightMap = null;
     let shapeDistanceField = null;
     let currentShapeMode = 'auto'; // 'auto', 'cube', 'circle'
+
+    // ORM Configuration State (glTF 2.0 / Cocos Creator / Unreal Packed)
+    let ormConfig = {
+        aoIntensity: 2.0,      // Cavity multiplier (default 2.0)
+        aoFloor: 0.75,         // Ambient baseline floor (default 0.75)
+        aoInvert: false,       // Invert AO
+        roughBase: 0.70,       // Roughness base multiplier (default 0.70)
+        roughDetail: 0.60,     // Detail gradient multiplier (default 0.60)
+        roughFloor: 0.20,      // Minimum roughness floor (default 0.20)
+        roughInvert: false,    // Invert roughness (glossiness)
+        metalAmount: 0.0,      // Global metallic value (default 0.0)
+        metalMaskCavity: false,// Cavity masking for metal
+        metalInvert: false     // Invert metallic
+    };
 
     // Elements
     const dropZone = document.getElementById('dropZone');
@@ -893,7 +1372,37 @@
     const downloadNormalBtn = document.getElementById('downloadNormalBtn');
     const downloadOrmBtn = document.getElementById('downloadOrmBtn');
     const openEditorBtn = document.getElementById('openEditorBtn');
+    const customizeOrmBtn = document.getElementById('customizeOrmBtn');
     const origInfo = document.getElementById('origInfo');
+
+    // Customize ORM Modal Elements
+    const ormModal = document.getElementById('ormModal');
+    const ormResetBtn = document.getElementById('ormResetBtn');
+    const ormApplyBtn = document.getElementById('ormApplyBtn');
+
+    const previewAoCanvas = document.getElementById('previewAoCanvas');
+    const previewRoughCanvas = document.getElementById('previewRoughCanvas');
+    const previewMetalCanvas = document.getElementById('previewMetalCanvas');
+    const previewCompositeOrmCanvas = document.getElementById('previewCompositeOrmCanvas');
+
+    const ormAoIntSlider = document.getElementById('ormAoIntSlider');
+    const ormAoIntVal = document.getElementById('ormAoIntVal');
+    const ormAoFloorSlider = document.getElementById('ormAoFloorSlider');
+    const ormAoFloorVal = document.getElementById('ormAoFloorVal');
+    const ormAoInvertCheck = document.getElementById('ormAoInvertCheck');
+
+    const ormRoughBaseSlider = document.getElementById('ormRoughBaseSlider');
+    const ormRoughBaseVal = document.getElementById('ormRoughBaseVal');
+    const ormRoughDetailSlider = document.getElementById('ormRoughDetailSlider');
+    const ormRoughDetailVal = document.getElementById('ormRoughDetailVal');
+    const ormRoughFloorSlider = document.getElementById('ormRoughFloorSlider');
+    const ormRoughFloorVal = document.getElementById('ormRoughFloorVal');
+    const ormRoughInvertCheck = document.getElementById('ormRoughInvertCheck');
+
+    const ormMetalAmountSlider = document.getElementById('ormMetalAmountSlider');
+    const ormMetalAmountVal = document.getElementById('ormMetalAmountVal');
+    const ormMetalCavityCheck = document.getElementById('ormMetalCavityCheck');
+    const ormMetalInvertCheck = document.getElementById('ormMetalInvertCheck');
 
     // Drag and drop handlers
     dropZone.addEventListener('click', () => fileInput.click());
@@ -943,6 +1452,7 @@
                 downloadNormalBtn.disabled = false;
                 downloadOrmBtn.disabled = false;
                 openEditorBtn.disabled = false;
+                customizeOrmBtn.disabled = false;
             };
             img.src = e.target.result;
         };
@@ -1001,9 +1511,9 @@
             shapeTypeGroup.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentShapeMode = btn.dataset.shape;
-            if (currentShapeMode === 'auto') shapeTypeVal.textContent = 'Auto Island';
-            else if (currentShapeMode === 'cube') shapeTypeVal.textContent = 'Cube / Box';
-            else if (currentShapeMode === 'circle') shapeTypeVal.textContent = 'Circle / Cylinder';
+            if (currentShapeMode === 'auto') shapeTypeVal.textContent = 'Auto';
+            else if (currentShapeMode === 'cube') shapeTypeVal.textContent = 'Box';
+            else if (currentShapeMode === 'circle') shapeTypeVal.textContent = 'Circle';
             computeShapeDistanceField();
             if (loadedImage) processTextures();
         });
@@ -1413,15 +1923,21 @@
                 const avgNeighbor = (z00 + z01 + z02 + z10 + z12 + z20 + z21 + z22) / 8.0;
                 let curvature = (centerH - avgNeighbor) * intensity;
                 if (maskVal > 0) curvature *= (1.0 - maskVal);
-                const ao = Math.min(1.0, Math.max(0.0, 0.75 + curvature * 2.0));
+                let ao = Math.min(1.0, Math.max(0.0, ormConfig.aoFloor + curvature * ormConfig.aoIntensity));
+                if (ormConfig.aoInvert) ao = 1.0 - ao;
 
                 // G: Roughness
                 const gradMag = Math.sqrt(dx * dx + dy * dy);
                 const roughnessGrad = gradMag * (1.0 - maskVal);
-                const roughness = Math.min(1.0, Math.max(0.2, (1.0 - centerH * 0.3) * 0.7 + roughnessGrad * (intensity * 0.6)));
+                let roughness = Math.min(1.0, Math.max(ormConfig.roughFloor, (1.0 - centerH * 0.3) * ormConfig.roughBase + roughnessGrad * (intensity * ormConfig.roughDetail)));
+                if (ormConfig.roughInvert) roughness = 1.0 - roughness;
 
                 // B: Metallic
-                const metallic = 0.0;
+                let metallic = ormConfig.metalAmount;
+                if (ormConfig.metalMaskCavity) {
+                    metallic = Math.min(1.0, Math.max(0.0, metallic * ao));
+                }
+                if (ormConfig.metalInvert) metallic = 1.0 - metallic;
 
                 ormData[pIdx] = Math.round(ao * 255);
                 ormData[pIdx + 1] = Math.round(roughness * 255);
@@ -1436,6 +1952,11 @@
         // Update Editor Canvas if open
         if (editorModal.classList.contains('active')) {
             renderEditorCanvas();
+        }
+
+        // Update ORM Modal Previews if open
+        if (ormModal.classList.contains('active')) {
+            updateOrmModalPreviews();
         }
 
         // Update 3D Preview
@@ -1829,6 +2350,194 @@
     });
 
     // -------------------------------------------------------------
+    // Customize ORM Modal Logic & Channel Separation
+    // -------------------------------------------------------------
+    function updateOrmModalPreviews() {
+        if (!loadedImage || !ormCanvas.width || !ormCanvas.height) return;
+        const w = ormCanvas.width;
+        const h = ormCanvas.height;
+        const ormCtx = ormCanvas.getContext('2d');
+        const srcImgData = ormCtx.getImageData(0, 0, w, h);
+        const srcData = srcImgData.data;
+        const totalPixels = w * h;
+
+        [previewAoCanvas, previewRoughCanvas, previewMetalCanvas, previewCompositeOrmCanvas].forEach(c => {
+            if (c.width !== w || c.height !== h) {
+                c.width = w;
+                c.height = h;
+            }
+        });
+
+        // 1. Composite Canvas
+        const compCtx = previewCompositeOrmCanvas.getContext('2d');
+        compCtx.putImageData(srcImgData, 0, 0);
+
+        // 2. AO Canvas (Red channel rendered as grayscale)
+        const aoCtx = previewAoCanvas.getContext('2d');
+        const aoImgData = aoCtx.createImageData(w, h);
+        const aoData = aoImgData.data;
+
+        // 3. Roughness Canvas (Green channel rendered as grayscale)
+        const roughCtx = previewRoughCanvas.getContext('2d');
+        const roughImgData = roughCtx.createImageData(w, h);
+        const roughData = roughImgData.data;
+
+        // 4. Metallic Canvas (Blue channel rendered as grayscale)
+        const metalCtx = previewMetalCanvas.getContext('2d');
+        const metalImgData = metalCtx.createImageData(w, h);
+        const metalData = metalImgData.data;
+
+        for (let i = 0; i < totalPixels; i++) {
+            const pIdx = i * 4;
+            const r = srcData[pIdx];
+            const g = srcData[pIdx + 1];
+            const b = srcData[pIdx + 2];
+
+            aoData[pIdx] = r;
+            aoData[pIdx + 1] = r;
+            aoData[pIdx + 2] = r;
+            aoData[pIdx + 3] = 255;
+
+            roughData[pIdx] = g;
+            roughData[pIdx + 1] = g;
+            roughData[pIdx + 2] = g;
+            roughData[pIdx + 3] = 255;
+
+            metalData[pIdx] = b;
+            metalData[pIdx + 1] = b;
+            metalData[pIdx + 2] = b;
+            metalData[pIdx + 3] = 255;
+        }
+
+        aoCtx.putImageData(aoImgData, 0, 0);
+        roughCtx.putImageData(roughImgData, 0, 0);
+        metalCtx.putImageData(metalImgData, 0, 0);
+    }
+
+    function syncOrmModalControlsFromState() {
+        ormAoIntSlider.value = ormConfig.aoIntensity;
+        ormAoIntVal.textContent = parseFloat(ormConfig.aoIntensity).toFixed(1) + 'x';
+        ormAoFloorSlider.value = ormConfig.aoFloor;
+        ormAoFloorVal.textContent = parseFloat(ormConfig.aoFloor).toFixed(2);
+        ormAoInvertCheck.checked = ormConfig.aoInvert;
+
+        ormRoughBaseSlider.value = ormConfig.roughBase;
+        ormRoughBaseVal.textContent = parseFloat(ormConfig.roughBase).toFixed(2);
+        ormRoughDetailSlider.value = ormConfig.roughDetail;
+        ormRoughDetailVal.textContent = parseFloat(ormConfig.roughDetail).toFixed(2) + 'x';
+        ormRoughFloorSlider.value = ormConfig.roughFloor;
+        ormRoughFloorVal.textContent = parseFloat(ormConfig.roughFloor).toFixed(2);
+        ormRoughInvertCheck.checked = ormConfig.roughInvert;
+
+        ormMetalAmountSlider.value = ormConfig.metalAmount;
+        ormMetalAmountVal.textContent = parseFloat(ormConfig.metalAmount).toFixed(2);
+        ormMetalCavityCheck.checked = ormConfig.metalMaskCavity;
+        ormMetalInvertCheck.checked = ormConfig.metalInvert;
+    }
+
+    // Modal Trigger Buttons
+    customizeOrmBtn.addEventListener('click', () => {
+        if (!loadedImage) return;
+        syncOrmModalControlsFromState();
+        ormModal.classList.add('active');
+        updateOrmModalPreviews();
+    });
+
+    ormApplyBtn.addEventListener('click', () => {
+        ormModal.classList.remove('active');
+    });
+
+    ormResetBtn.addEventListener('click', () => {
+        ormConfig = {
+            aoIntensity: 2.0,
+            aoFloor: 0.75,
+            aoInvert: false,
+            roughBase: 0.70,
+            roughDetail: 0.60,
+            roughFloor: 0.20,
+            roughInvert: false,
+            metalAmount: 0.0,
+            metalMaskCavity: false,
+            metalInvert: false
+        };
+        syncOrmModalControlsFromState();
+        if (loadedImage) {
+            processTextures();
+            updateOrmModalPreviews();
+        }
+    });
+
+    // Sliders & Checkboxes Listeners
+    ormAoIntSlider.addEventListener('input', () => {
+        ormConfig.aoIntensity = parseFloat(ormAoIntSlider.value);
+        ormAoIntVal.textContent = ormConfig.aoIntensity.toFixed(1) + 'x';
+        if (loadedImage) { processTextures(); updateOrmModalPreviews(); }
+    });
+
+    ormAoFloorSlider.addEventListener('input', () => {
+        ormConfig.aoFloor = parseFloat(ormAoFloorSlider.value);
+        ormAoFloorVal.textContent = ormConfig.aoFloor.toFixed(2);
+        if (loadedImage) { processTextures(); updateOrmModalPreviews(); }
+    });
+
+    ormAoInvertCheck.addEventListener('change', () => {
+        ormConfig.aoInvert = ormAoInvertCheck.checked;
+        if (loadedImage) { processTextures(); updateOrmModalPreviews(); }
+    });
+
+    ormRoughBaseSlider.addEventListener('input', () => {
+        ormConfig.roughBase = parseFloat(ormRoughBaseSlider.value);
+        ormRoughBaseVal.textContent = ormConfig.roughBase.toFixed(2);
+        if (loadedImage) { processTextures(); updateOrmModalPreviews(); }
+    });
+
+    ormRoughDetailSlider.addEventListener('input', () => {
+        ormConfig.roughDetail = parseFloat(ormRoughDetailSlider.value);
+        ormRoughDetailVal.textContent = ormConfig.roughDetail.toFixed(2) + 'x';
+        if (loadedImage) { processTextures(); updateOrmModalPreviews(); }
+    });
+
+    ormRoughFloorSlider.addEventListener('input', () => {
+        ormConfig.roughFloor = parseFloat(ormRoughFloorSlider.value);
+        ormRoughFloorVal.textContent = ormConfig.roughFloor.toFixed(2);
+        if (loadedImage) { processTextures(); updateOrmModalPreviews(); }
+    });
+
+    ormRoughInvertCheck.addEventListener('change', () => {
+        ormConfig.roughInvert = ormRoughInvertCheck.checked;
+        if (loadedImage) { processTextures(); updateOrmModalPreviews(); }
+    });
+
+    ormMetalAmountSlider.addEventListener('input', () => {
+        ormConfig.metalAmount = parseFloat(ormMetalAmountSlider.value);
+        ormMetalAmountVal.textContent = ormConfig.metalAmount.toFixed(2);
+        if (loadedImage) { processTextures(); updateOrmModalPreviews(); }
+    });
+
+    ormMetalCavityCheck.addEventListener('change', () => {
+        ormConfig.metalMaskCavity = ormMetalCavityCheck.checked;
+        if (loadedImage) { processTextures(); updateOrmModalPreviews(); }
+    });
+
+    ormMetalInvertCheck.addEventListener('change', () => {
+        ormConfig.metalInvert = ormMetalInvertCheck.checked;
+        if (loadedImage) { processTextures(); updateOrmModalPreviews(); }
+    });
+
+    // Close on backdrop click & Escape
+    ormModal.addEventListener('click', (e) => {
+        if (e.target === ormModal) {
+            ormModal.classList.remove('active');
+        }
+    });
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && ormModal.classList.contains('active')) {
+            ormModal.classList.remove('active');
+        }
+    });
+
+    // -------------------------------------------------------------
     // 3D Live Viewport (Three.js)
     // -------------------------------------------------------------
     let scene, camera, renderer, material, mesh, controls;
@@ -1847,7 +2556,7 @@
         const height = container.clientHeight || 280;
 
         scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x0f1117);
+        scene.background = new THREE.Color(0x0e0e0c);
 
         camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
         camera.position.set(0, 0, 3.2);
@@ -1864,15 +2573,15 @@
         controls.autoRotate = true;
         controls.autoRotateSpeed = 1.5;
 
-        // Lights
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        // Workbench Lights: Neutral key + warm terracotta rim/fill
+        const ambientLight = new THREE.AmbientLight(0xfff8ee, 0.65);
         scene.add(ambientLight);
 
         const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.2);
         dirLight1.position.set(3, 4, 3);
         scene.add(dirLight1);
 
-        const dirLight2 = new THREE.DirectionalLight(0x60a5fa, 0.6);
+        const dirLight2 = new THREE.DirectionalLight(0xd97036, 0.45);
         dirLight2.position.set(-3, -2, -3);
         scene.add(dirLight2);
 
@@ -1939,13 +2648,49 @@
         material.normalMap = normTex;
         material.normalScale = new THREE.Vector2(1.0, 1.0);
         material.roughnessMap = ormTex;
+        material.metalnessMap = ormTex;
         material.aoMap = ormTex;
         material.aoMapIntensity = 1.0;
+        material.roughness = 1.0;
+        material.metalness = 1.0;
         material.needsUpdate = true;
     }
 
-    // Initialize 3D when DOM ready
-    window.addEventListener('DOMContentLoaded', init3D);
+    // Auto-load sample texture if ?demo=1 or ?sample=1
+    function checkAutoLoadSample() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('demo') === '1' || urlParams.get('sample') === '1') {
+            const sampleImg = new Image();
+            sampleImg.crossOrigin = "anonymous";
+            sampleImg.onload = () => {
+                loadedImage = sampleImg;
+                fileName = "pbr_texture_tools";
+                imageWidth = sampleImg.width;
+                imageHeight = sampleImg.height;
+                brushMask = new Float32Array(imageWidth * imageHeight);
+                origInfo.textContent = `${sampleImg.width} × ${sampleImg.height} px`;
+                updateExportSizeLabel();
+                computeShapeDistanceField();
+                processTextures();
+                downloadAllBtn.disabled = false;
+                downloadNormalBtn.disabled = false;
+                downloadOrmBtn.disabled = false;
+                openEditorBtn.disabled = false;
+                customizeOrmBtn.disabled = false;
+                const dropText = dropZone.querySelector('.drop-text');
+                const dropSub = dropZone.querySelector('.drop-subtext');
+                if (dropText) dropText.textContent = 'Texture Active: PBR Texture Tools — Normal & ORM Generator.jpg (Click or Drop to Replace)';
+                if (dropSub) dropSub.textContent = `${sampleImg.width} × ${sampleImg.height} px • Normal & ORM Synthesized • Live 3D Viewport`;
+            };
+            sampleImg.src = "/images/pbr_texture_tools.jpg";
+        }
+    }
+
+    // Initialize 3D and check sample when DOM ready
+    window.addEventListener('DOMContentLoaded', () => {
+        init3D();
+        checkAutoLoadSample();
+    });
 </script>
 </body>
 </html>
